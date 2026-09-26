@@ -42,10 +42,10 @@ export function Actions() {
           <Reveal>
             <Eyebrow>Actions</Eyebrow>
           </Reveal>
-          <Reveal as="h2" className="mt-5 text-[clamp(32px,4vw,54px)] font-[540] leading-[1.04] tracking-[-0.035em]" delay={0.05}>
+          <Reveal as="h2" className="mt-5 text-[clamp(28.8px,3.6vw,48.6px)] font-[540] leading-[1.04] tracking-[-0.035em]" delay={0.05}>
             It does the work. And knows when to hand over.
           </Reveal>
-          <Reveal as="p" className="mt-5 max-w-[28rem] text-[17px] leading-[1.5] text-ink-2" delay={0.1}>
+          <Reveal as="p" className="mt-5 max-w-[28rem] text-[15.3px] leading-[1.5] text-ink-2" delay={0.1}>
             Mid-call, the agent works in your CRM, orders, bookings and payments — inside limits
             you set.
           </Reveal>
@@ -70,8 +70,8 @@ export function Actions() {
                         on ? (e.tone === "slow" ? "bg-fault" : "bg-lime-deep") : "bg-line-2"
                       }`}
                     />
-                    <span className="w-40 shrink-0 text-[15px] font-[520]">{e.sys}</span>
-                    <span className={`text-[15px] ${e.tone === "slow" ? "text-fault" : "text-ink-2"}`}>{e.t}</span>
+                    <span className="w-40 shrink-0 text-[13.5px] font-[520]">{e.sys}</span>
+                    <span className={`text-[13.5px] ${e.tone === "slow" ? "text-fault" : "text-ink-2"}`}>{e.t}</span>
                   </motion.li>
                 );
               })}
@@ -80,12 +80,12 @@ export function Actions() {
               initial={false}
               animate={{ opacity: shown > EVENTS.length ? 1 : 0, y: shown > EVENTS.length ? 0 : 8 }}
               transition={{ duration: 0.6, ease: ease.out }}
-              className="m-2 mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[12px] bg-ink px-5 py-4 text-bone"
+              className="m-2 mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[10.8px] bg-ink px-5 py-4 text-bone"
             >
-              <span className="text-[15px]">
+              <span className="text-[13.5px]">
                 A refund over the £50 limit? <span className="text-bone/60">It goes to a person — with the full story.</span>
               </span>
-              <span className="rounded-[8px] bg-lime px-3 py-1 text-[13px] text-ink">Handed to Sam · Returns</span>
+              <span className="rounded-[7.2px] bg-lime px-3 py-1 text-[11.7px] text-ink">Handed to Sam · Returns</span>
             </motion.div>
           </Card>
         </div>

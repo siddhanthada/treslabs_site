@@ -105,7 +105,7 @@ export function SpeakerLabel({
   const dim = dark ? "text-on-carbon-3" : "text-ink-3";
   return (
     <span className={`t-label ${dim} flex items-center gap-2`}>
-      <span className="relative inline-flex h-[10px] w-[3px] items-center" aria-hidden>
+      <span className="relative inline-flex h-[9px] w-[2.7px] items-center" aria-hidden>
         <span
           className={`absolute inset-0 rounded-full ${
             speaking ? "speaking-bar bg-signal" : dark ? "bg-on-carbon-3/60" : "bg-line-2"

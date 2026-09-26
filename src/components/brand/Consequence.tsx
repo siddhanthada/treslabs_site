@@ -30,7 +30,7 @@ export function Consequence({
           exit={{ opacity: 0 }}
           transition={{ duration: 1.1, ease: ease.brake, delay }}
         >
-          <div className="absolute inset-x-0 top-0 h-[3px]" style={{ background: "var(--dawn)" }} />
+          <div className="absolute inset-x-0 top-0 h-[2.7px]" style={{ background: "var(--dawn)" }} />
           {children}
         </motion.div>
       )}

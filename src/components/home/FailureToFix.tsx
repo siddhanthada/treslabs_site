@@ -57,9 +57,9 @@ export function FailureToFix() {
                 <div className={`t-label ${i === 4 && on ? "text-bone/60" : "text-ink-3"}`}>
                   0{i + 1} {s.k}
                 </div>
-                <div className="my-5 grid h-[92px] place-items-center">{s.v}</div>
-                <div className="mt-auto text-[26px] font-[540] leading-none tracking-[-0.03em]">{s.big}</div>
-                <div className={`mt-1.5 text-[14px] ${i === 4 && on ? "text-bone/70" : "text-ink-2"}`}>{s.small}</div>
+                <div className="my-5 grid h-[82.8px] place-items-center">{s.v}</div>
+                <div className="mt-auto text-[23.4px] font-[540] leading-none tracking-[-0.03em]">{s.big}</div>
+                <div className={`mt-1.5 text-[12.6px] ${i === 4 && on ? "text-bone/70" : "text-ink-2"}`}>{s.small}</div>
               </Card>
             </motion.div>
           );
@@ -80,11 +80,11 @@ function Pulse() {
 
 function Cluster({ on }: { on: boolean }) {
   return (
-    <div className="grid grid-cols-9 gap-[5px]">
+    <div className="grid grid-cols-9 gap-[4.5px]">
       {Array.from({ length: 36 }, (_, i) => (
         <motion.span
           key={i}
-          className="h-[9px] w-[9px] rounded-full bg-fault"
+          className="h-[8.1px] w-[8.1px] rounded-full bg-fault"
           initial={false}
           animate={{ opacity: on ? 1 : 0.15, scale: on ? 1 : 0.6 }}
           transition={{ delay: on ? i * 0.012 : 0, duration: 0.3 }}
@@ -96,10 +96,10 @@ function Cluster({ on }: { on: boolean }) {
 
 function Diff() {
   return (
-    <div className="w-full space-y-1.5 text-[11.5px] leading-tight">
-      <div className="rounded-[6px] bg-fault-tint px-2 py-1 text-fault">− apologise, offer a callback</div>
-      <div className="rounded-[6px] bg-sink px-2 py-1 text-ink">+ after 1.2s, use warehouse feed</div>
-      <div className="rounded-[6px] bg-sink px-2 py-1 text-ink">+ tell the caller what’s known</div>
+    <div className="w-full space-y-1.5 text-[10.35px] leading-tight">
+      <div className="rounded-[5.4px] bg-fault-tint px-2 py-1 text-fault">− apologise, offer a callback</div>
+      <div className="rounded-[5.4px] bg-sink px-2 py-1 text-ink">+ after 1.2s, use warehouse feed</div>
+      <div className="rounded-[5.4px] bg-sink px-2 py-1 text-ink">+ tell the caller what’s known</div>
     </div>
   );
 }
@@ -108,7 +108,7 @@ function Replay({ on }: { on: boolean }) {
   return (
     <div className="w-full space-y-2">
       {[71.6, 76.6].map((p, i) => (
-        <div key={p} className="h-[8px] rounded-full bg-sink">
+        <div key={p} className="h-[7.2px] rounded-full bg-sink">
           <motion.div
             className={`h-full rounded-full ${i ? "bg-lime" : "bg-line-2"}`}
             initial={false}
@@ -124,7 +124,7 @@ function Replay({ on }: { on: boolean }) {
 function Approve({ on }: { on: boolean }) {
   return (
     <span className={on ? "text-lime" : "text-ink-3"}>
-      <Mark spinning={false} intro={false} className="h-[44px] w-auto" title="" />
+      <Mark spinning={false} intro={false} className="h-[39.6px] w-auto" title="" />
     </span>
   );
 }

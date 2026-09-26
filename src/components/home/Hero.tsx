@@ -71,7 +71,7 @@ export function Hero() {
   const thinking = t > 2.6 && t < 4.2;
 
   return (
-    <section ref={ref} id="top" className="flex min-h-[calc(100svh/0.9)] items-center pt-[var(--nav-h)]">
+    <section ref={ref} id="top" className="flex min-h-svh items-center pt-[var(--nav-h)]">
       <div className="wrap grid w-full items-center gap-12 py-12 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-5">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
@@ -81,7 +81,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: ease.out, delay: 0.05 }}
-            className="mt-7 text-[clamp(46px,5.3vw,80px)] font-[560] leading-[0.98] tracking-[-0.045em]"
+            className="mt-7 text-[clamp(41.4px,4.77vw,72px)] font-[560] leading-[0.98] tracking-[-0.045em]"
           >
             Voice agents that get better in production.
           </motion.h1>
@@ -89,7 +89,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: ease.out, delay: 0.12 }}
-            className="mt-6 max-w-[28rem] text-[18px] leading-[1.5] text-ink-2"
+            className="mt-6 max-w-[28rem] text-[16.2px] leading-[1.5] text-ink-2"
           >
             Treslabs answers your calls, checks every conversation, and fixes what goes wrong — with
             your team approving every change.
@@ -138,7 +138,7 @@ export function Hero() {
                 src={PEOPLE.hero.src}
                 focus={PEOPLE.hero.focus}
                 cols={42}
-                className="absolute inset-x-0 top-0 bottom-[78px] overflow-hidden rounded-[16px]"
+                className="absolute inset-x-0 top-0 bottom-[70.2px] overflow-hidden rounded-[14.4px]"
                 alt="An illustrative caller on the phone, rendered in pixels"
               />
               <div className="absolute inset-x-0 bottom-0">
@@ -149,7 +149,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="speech-caller mt-2 text-[17px] leading-tight text-ink"
+                    className="speech-caller mt-2 text-[15.3px] leading-tight text-ink"
                   >
                     {t < 8 ? "“My lamp was meant to come Monday.”" : "“Oh — brilliant. Thank you.”"}
                   </motion.p>
@@ -159,7 +159,7 @@ export function Hero() {
 
             {/* treslabs: a frame with a drawn shadow plane behind it */}
             <div
-              className="absolute rounded-[14px] border border-dashed border-line-2"
+              className="absolute rounded-[12.6px] border border-dashed border-line-2"
               style={{ left: pct(CORE.x + 9, W), top: pct(CORE.y + 9, H), width: pct(CORE.s, W), height: pct(CORE.s, H) }}
               aria-hidden
             />
@@ -178,12 +178,12 @@ export function Hero() {
               return (
                 <Box key={s.k} x={SYS_X} y={s.y} w={SYS_W} h={SYS_H}>
                   <span
-                    className={`absolute -left-[4px] top-1/2 h-[8px] w-[8px] -translate-y-1/2 rounded-[3px] transition-colors duration-300 ${
+                    className={`absolute -left-[3.6px] top-1/2 h-[7.2px] w-[7.2px] -translate-y-1/2 rounded-[2.7px] transition-colors duration-300 ${
                       on ? "bg-lime-deep" : "bg-line-2"
                     }`}
                   />
                   <div className="flex h-full flex-col justify-center px-4">
-                    <div className="text-[13.5px] font-[540]">{s.k}</div>
+                    <div className="text-[12.15px] font-[540]">{s.k}</div>
                     <motion.div
                       initial={false}
                       animate={{ opacity: on ? 1 : 0, y: on ? 0 : 3 }}
@@ -204,7 +204,7 @@ export function Hero() {
                   {Array.from({ length: 6 }, (_, i) => (
                     <span
                       key={i}
-                      className={`h-[16px] flex-1 rounded-[4px] border transition-colors duration-300 ${
+                      className={`h-[14.4px] flex-1 rounded-[3.6px] border transition-colors duration-300 ${
                         live(12.4 + i * 0.12) ? "border-lime-deep/50 bg-lime" : "border-line-2"
                       }`}
                     />
@@ -220,7 +220,7 @@ export function Hero() {
             <Box x={250} y={470} w={250} h={110} label="outcome">
               <div className="flex h-full items-center gap-4 px-4 pt-4">
                 <span
-                  className={`grid h-10 w-10 shrink-0 place-items-center rounded-[10px] transition-colors duration-500 ${
+                  className={`grid h-10 w-10 shrink-0 place-items-center rounded-[9px] transition-colors duration-500 ${
                     live(11.2) ? "bg-lime text-ink" : "bg-sink text-ink-3"
                   }`}
                 >
@@ -229,7 +229,7 @@ export function Hero() {
                   </svg>
                 </span>
                 <motion.div initial={false} animate={{ opacity: live(11.5) ? 1 : 0.35 }} transition={{ duration: 0.5 }}>
-                  <div className="text-[14.5px] font-[540]">{live(11.5) ? "Delivered" : "Waiting on outcome"}</div>
+                  <div className="text-[13.05px] font-[540]">{live(11.5) ? "Delivered" : "Waiting on outcome"}</div>
                   <div className="t-label mt-1 text-ink-2">Thu 14:52 · no second call</div>
                 </motion.div>
               </div>
@@ -262,7 +262,7 @@ function Box({
 }) {
   return (
     <div
-      className={`absolute rounded-[14px] border transition-shadow duration-500 ${solid ? "border-line-2 bg-paper shadow-[0_10px_30px_-18px_rgba(17,18,24,.35)]" : "border-line bg-paper"} ${glow ? "!shadow-[0_0_0_6px_rgba(215,243,106,.55),0_10px_30px_-18px_rgba(17,18,24,.35)]" : ""}`}
+      className={`absolute rounded-[12.6px] border transition-shadow duration-500 ${solid ? "border-line-2 bg-paper shadow-[0_10px_30px_-16.2px_rgba(17,18,24,.35)]" : "border-line bg-paper"} ${glow ? "!shadow-[0_0_0_6px_rgba(215,243,106,.55),0_10px_30px_-16.2px_rgba(17,18,24,.35)]" : ""}`}
       style={{ left: pct(x, W), top: pct(y, H), width: pct(w, W), height: pct(h, H) }}
     >
       {label && <span className="t-label absolute left-3.5 top-3 text-ink-3">{label}</span>}
@@ -310,11 +310,11 @@ function Pulse({ pts, warm }: { pts: Pt[]; warm?: boolean }) {
 
 function Voice({ active }: { active: boolean }) {
   return (
-    <div className="flex h-4 items-center gap-[3px]" aria-hidden>
+    <div className="flex h-4 items-center gap-[2.7px]" aria-hidden>
       {Array.from({ length: 24 }, (_, i) => (
         <motion.span
           key={i}
-          className="w-[2px] bg-lime-deep"
+          className="w-[1.8px] bg-lime-deep"
           animate={active ? { height: ["25%", `${35 + ((i * 41) % 65)}%`, "25%"] } : { height: "15%" }}
           transition={active ? { duration: 0.8 + (i % 5) * 0.14, repeat: Infinity, delay: i * 0.03 } : { duration: 0.4 }}
         />

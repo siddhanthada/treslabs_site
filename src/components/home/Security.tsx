@@ -46,14 +46,14 @@ export function Security() {
               className="flex flex-col items-center text-center"
             >
               <Seal {...s} />
-              <div className="mt-4 text-[14px] font-[520]">{s.status}</div>
+              <div className="mt-4 text-[12.6px] font-[520]">{s.status}</div>
               {DRAFT && !s.verified && (
-                <div className="mt-1 rounded-[6px] bg-fault-tint px-1.5 text-[10.5px] text-fault">draft · verify</div>
+                <div className="mt-1 rounded-[5.4px] bg-fault-tint px-1.5 text-[9.45px] text-fault">draft · verify</div>
               )}
             </motion.div>
           ))}
           </div>
-          <p className="border-t border-line pt-5 text-center text-[14.5px] leading-[1.5] text-ink-2">
+          <p className="border-t border-line pt-5 text-center text-[13.05px] leading-[1.5] text-ink-2">
             Reports and our data processing agreement are available under NDA during evaluation.
           </p>
         </Card>
@@ -66,14 +66,14 @@ export function Security() {
               transition={{ duration: 0.6, ease: ease.out, delay: 0.2 + i * 0.08 }}
             >
               <Card className="h-full p-6">
-                <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-lime">
+                <span className="grid h-9 w-9 place-items-center rounded-[9px] bg-lime">
                   <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
                     <path d="M8 1.8 13 3.6v4c0 3-2.1 5.4-5 6.6C5.1 13 3 10.6 3 7.6v-4Z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
                   </svg>
                 </span>
-                <h3 className="mt-5 text-[17px] font-[540] tracking-[-0.01em]">{c.t}</h3>
-                <p className="mt-1.5 text-[14.5px] leading-[1.5] text-ink-2">{c.d}</p>
-                {DRAFT && <div className="mt-2 inline-flex rounded-[6px] bg-fault-tint px-1.5 text-[10.5px] text-fault">draft · verify</div>}
+                <h3 className="mt-5 text-[15.3px] font-[540] tracking-[-0.01em]">{c.t}</h3>
+                <p className="mt-1.5 text-[13.05px] leading-[1.5] text-ink-2">{c.d}</p>
+                {DRAFT && <div className="mt-2 inline-flex rounded-[5.4px] bg-fault-tint px-1.5 text-[9.45px] text-fault">draft · verify</div>}
               </Card>
             </motion.div>
           ))}
@@ -87,7 +87,7 @@ export function Security() {
 function Seal({ top, big, sub }: { top: string; big: string; sub: string }) {
   const id = `ring-${big}`;
   return (
-    <svg viewBox="0 0 140 140" className="h-[124px] w-[124px]" aria-label={`${big} ${sub}`}>
+    <svg viewBox="0 0 140 140" className="h-[111.6px] w-[111.6px]" aria-label={`${big} ${sub}`}>
       <circle cx="70" cy="70" r="66" fill="#fff" stroke="#111218" strokeWidth="1.2" />
       <circle cx="70" cy="70" r="54" fill="#d7f36a" />
       <circle cx="70" cy="70" r="54" fill="none" stroke="#111218" strokeWidth="1" strokeDasharray="2 3" />

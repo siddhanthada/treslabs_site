@@ -48,11 +48,11 @@ export function Human() {
                   focus={s.who.focus}
                   cols={84}
                   build={2.2}
-                  className="aspect-[16/10] w-full overflow-hidden rounded-[12px]"
+                  className="aspect-[16/10] w-full overflow-hidden rounded-[10.8px]"
                   alt=""
                 />
                 <span
-                  className={`absolute left-3 top-3 rounded-[8px] px-2.5 py-1 text-[12.5px] ${
+                  className={`absolute left-3 top-3 rounded-[7.2px] px-2.5 py-1 text-[11.25px] ${
                     s.bad ? "bg-paper text-fault" : "bg-lime text-ink"
                   }`}
                 >
@@ -60,8 +60,8 @@ export function Human() {
                 </span>
               </div>
               <div className="px-5 pb-5 pt-6">
-                <p className="speech-caller text-[30px] leading-[1.12]">{s.line}</p>
-                <p className="mt-3 text-[15px] leading-[1.5] text-ink-2">{s.note}</p>
+                <p className="speech-caller text-[27px] leading-[1.12]">{s.line}</p>
+                <p className="mt-3 text-[13.5px] leading-[1.5] text-ink-2">{s.note}</p>
               </div>
             </Card>
           </motion.div>

@@ -42,7 +42,7 @@ export function Nav() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 h-[var(--nav-h)] backdrop-blur-[6px] transition-[background-color,box-shadow,color] duration-500 ${
+      className={`fixed inset-x-0 top-0 z-50 h-[var(--nav-h)] backdrop-blur-[5.4px] transition-[background-color,box-shadow,color] duration-500 ${
         dark ? "bg-carbon/80 text-on-carbon" : "bg-bone/92 text-ink"
       } ${scrolled ? (dark ? "shadow-[0_1px_0_var(--color-carbon-line)]" : "shadow-[0_1px_0_var(--color-line)]") : ""}`}
     >
@@ -56,7 +56,7 @@ export function Nav() {
             <li key={l.href}>
               <a
                 href={l.href}
-                className={`text-[14.5px] transition-colors ${dark ? "text-on-carbon-2 hover:text-on-carbon" : "text-ink-2 hover:text-ink"}`}
+                className={`text-[13.05px] transition-colors ${dark ? "text-on-carbon-2 hover:text-on-carbon" : "text-ink-2 hover:text-ink"}`}
               >
                 {l.label}
               </a>
@@ -65,7 +65,7 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2">
-          <a href="#contact" className="btn btn-lime hidden !h-[38px] !px-4 !text-[14px] md:inline-flex">
+          <a href="#contact" className="btn btn-lime hidden !h-[34.2px] !px-4 !text-[12.6px] md:inline-flex">
             Book a demo
           </a>
           <button
@@ -77,13 +77,13 @@ export function Nav() {
             onClick={() => setOpen((o) => !o)}
           >
             <span
-              className={`absolute h-[1.5px] w-[18px] bg-ink transition-transform duration-300 ${
-                open ? "rotate-45" : "-translate-y-[4px]"
+              className={`absolute h-[1.35px] w-[16.2px] bg-ink transition-transform duration-300 ${
+                open ? "rotate-45" : "-translate-y-[3.6px]"
               }`}
             />
             <span
-              className={`absolute h-[1.5px] w-[18px] bg-ink transition-transform duration-300 ${
-                open ? "-rotate-45" : "translate-y-[4px]"
+              className={`absolute h-[1.35px] w-[16.2px] bg-ink transition-transform duration-300 ${
+                open ? "-rotate-45" : "translate-y-[3.6px]"
               }`}
             />
           </button>
@@ -112,7 +112,7 @@ export function Nav() {
                   <a
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-baseline justify-between py-5 text-[30px] tracking-[-0.03em]"
+                    className="flex items-baseline justify-between py-5 text-[27px] tracking-[-0.03em]"
                   >
                     {l.label}
                     <span className="t-label text-ink-3">0{i + 1}</span>

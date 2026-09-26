@@ -50,7 +50,7 @@ export function Sampling() {
     >
       <div ref={ref}>
         <Card className="grid items-center gap-10 p-6 md:p-10 lg:grid-cols-2 lg:gap-16">
-          <div className="grid gap-[4px]" style={{ gridTemplateColumns: "repeat(27, minmax(0, 1fr))" }} aria-hidden>
+          <div className="grid gap-[3.6px]" style={{ gridTemplateColumns: "repeat(27, minmax(0, 1fr))" }} aria-hidden>
             {Array.from({ length: 540 }, (_, i) => (
               <span
                 key={i}
@@ -75,7 +75,7 @@ export function Sampling() {
                     setTab(i);
                     setAuto(false);
                   }}
-                  className={`rounded-[10px] px-4 py-2 text-[14px] transition-colors ${
+                  className={`rounded-[9px] px-4 py-2 text-[12.6px] transition-colors ${
                     tab === i ? (i === 3 ? "bg-lime text-ink" : "bg-ink text-bone") : "bg-sink text-ink-2 hover:text-ink"
                   }`}
                 >
@@ -92,13 +92,13 @@ export function Sampling() {
                 transition={{ duration: 0.4, ease: ease.out }}
                 className="mt-10"
               >
-                <div className={`text-[clamp(72px,8vw,120px)] font-[520] leading-none tracking-[-0.05em] `}>
+                <div className={`text-[clamp(64.8px,7.2vw,108px)] font-[520] leading-none tracking-[-0.05em] `}>
                   {TABS[tab].n}
                 </div>
-                <p className="mt-4 max-w-[26rem] text-[18px] leading-[1.45] text-ink-2">{TABS[tab].line}</p>
+                <p className="mt-4 max-w-[26rem] text-[16.2px] leading-[1.45] text-ink-2">{TABS[tab].line}</p>
               </motion.div>
             </AnimatePresence>
-            <div className="mt-10 flex flex-wrap gap-5 text-[13px] text-ink-3">
+            <div className="mt-10 flex flex-wrap gap-5 text-[11.7px] text-ink-3">
               <Legend c="var(--color-fault)" t="Failed call" />
               <Legend c="var(--color-ink)" t="Heard by QA" />
               <Legend c="var(--color-lime)" t="Evaluated by Treslabs" />

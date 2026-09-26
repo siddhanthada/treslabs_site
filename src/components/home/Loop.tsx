@@ -32,11 +32,11 @@ export function Loop() {
             transition={{ duration: 0.7, ease: ease.out, delay: i * 0.1 }}
           >
             <Card className="flex h-full flex-col overflow-hidden">
-              <div className="relative m-2 h-[180px] rounded-[12px] bg-bone">{c.v}</div>
+              <div className="relative m-2 h-[162px] rounded-[10.8px] bg-bone">{c.v}</div>
               <div className="px-6 pb-6 pt-4">
                 <div className="t-label text-ink-3">{c.n}</div>
-                <h3 className="mt-2 text-[22px] font-[540] tracking-[-0.02em]">{c.t}</h3>
-                <p className="mt-2 text-[15px] leading-[1.5] text-ink-2">{c.d}</p>
+                <h3 className="mt-2 text-[19.8px] font-[540] tracking-[-0.02em]">{c.t}</h3>
+                <p className="mt-2 text-[13.5px] leading-[1.5] text-ink-2">{c.d}</p>
               </div>
             </Card>
           </motion.div>
@@ -60,7 +60,7 @@ function BuildViz({ on }: { on: boolean }) {
           initial={{ opacity: 0, x: -10 }}
           animate={on ? { opacity: 1, x: 0 } : undefined}
           transition={{ delay: 0.4 + i * 0.25, duration: 0.5, ease: ease.out }}
-          className="flex items-center gap-3 rounded-[8px] border border-line bg-paper px-3 py-2 text-[13px]"
+          className="flex items-center gap-3 rounded-[7.2px] border border-line bg-paper px-3 py-2 text-[11.7px]"
         >
           <span className="w-[4.5rem] shrink-0 text-ink-3">{k}</span>
           <span className="truncate">{v}</span>
@@ -81,14 +81,14 @@ function RunViz() {
   ];
   return (
     <div className="absolute inset-0 flex flex-col justify-center gap-3 px-6">
-      <div className="flex items-center gap-2 text-[12.5px] text-ink-2">
+      <div className="flex items-center gap-2 text-[11.25px] text-ink-2">
         <span className="live-dot !h-1.5 !w-1.5" />
         Live · order line
       </div>
       {turns.map((t, i) => (
         <div key={i} className={`flex ${t.who === "a" ? "justify-end" : ""}`}>
           <motion.span
-            className={`h-[9px] rounded-full ${t.who === "c" ? "bg-lime-deep" : "bg-ink"}`}
+            className={`h-[8.1px] rounded-full ${t.who === "c" ? "bg-lime-deep" : "bg-ink"}`}
             initial={{ width: 0 }}
             animate={{ width: [`0%`, `${t.w}%`, `${t.w}%`, "0%"] }}
             transition={{ duration: 6, times: [0, 0.12, 0.88, 1], delay: i * 0.7, repeat: Infinity, repeatDelay: 0.6, ease: "easeInOut" }}
@@ -114,10 +114,10 @@ function EvalViz({ on }: { on: boolean }) {
           initial={{ opacity: 0 }}
           animate={on ? { opacity: 1 } : undefined}
           transition={{ delay: 0.5 + i * 0.3, duration: 0.4 }}
-          className="flex items-center justify-between rounded-[8px] bg-paper px-3 py-1.5 text-[13px]"
+          className="flex items-center justify-between rounded-[7.2px] bg-paper px-3 py-1.5 text-[11.7px]"
         >
           {t}
-          <span className={`grid h-5 w-5 place-items-center rounded-full text-[11px] ${ok ? "bg-lime text-ink" : "bg-fault-tint text-fault"}`}>
+          <span className={`grid h-5 w-5 place-items-center rounded-full text-[9.9px] ${ok ? "bg-lime text-ink" : "bg-fault-tint text-fault"}`}>
             {ok ? "✓" : "✕"}
           </span>
         </motion.div>
@@ -129,9 +129,9 @@ function EvalViz({ on }: { on: boolean }) {
 function ImproveViz({ on }: { on: boolean }) {
   return (
     <div className="absolute inset-0 flex flex-col justify-center gap-4 px-6">
-      <div className="flex items-center gap-2 text-[12.5px] text-ink-2">
+      <div className="flex items-center gap-2 text-[11.25px] text-ink-2">
         <span className="text-ink">
-          <Mark spinning={false} className="h-[13px] w-auto" title="" />
+          <Mark spinning={false} className="h-[11.7px] w-auto" title="" />
         </span>
         v14 → v15
       </div>
@@ -140,11 +140,11 @@ function ImproveViz({ on }: { on: boolean }) {
         { v: "v15", p: 76.6, c: "bg-lime" },
       ].map((b, i) => (
         <div key={b.v}>
-          <div className="flex justify-between text-[12.5px] text-ink-3">
+          <div className="flex justify-between text-[11.25px] text-ink-3">
             <span>{b.v}</span>
             <span>{b.p}% resolved</span>
           </div>
-          <div className="mt-1.5 h-[8px] rounded-full bg-paper">
+          <div className="mt-1.5 h-[7.2px] rounded-full bg-paper">
             <motion.div
               className={`h-full rounded-full ${b.c}`}
               initial={{ width: 0 }}

@@ -26,9 +26,12 @@ export default function Home() {
         <Actions />
         <Capabilities />
         <Security />
-        <CTA />
       </main>
-      <Footer />
+      {/* The last screen is exactly the call to action + footer; the nav sits over its dark top. */}
+      <div className="flex min-h-svh flex-col bg-carbon">
+        <CTA />
+        <Footer />
+      </div>
     </>
   );
 }

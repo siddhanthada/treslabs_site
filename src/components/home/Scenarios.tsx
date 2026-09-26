@@ -81,7 +81,7 @@ export function Scenarios() {
                 type="button"
                 onClick={() => choose(i)}
                 aria-pressed={active}
-                className={`group flex items-center gap-4 rounded-[16px] border p-3 text-left transition-colors ${
+                className={`group flex items-center gap-4 rounded-[14.4px] border p-3 text-left transition-colors ${
                   active ? "border-ink bg-paper" : "border-line bg-paper/60 hover:border-line-2 hover:bg-paper"
                 }`}
               >
@@ -92,15 +92,15 @@ export function Scenarios() {
                   build={1.2}
                   scan={false}
                   gap={0.4}
-                  className="h-[76px] w-[76px] shrink-0 overflow-hidden rounded-[10px]"
+                  className="h-[68.4px] w-[68.4px] shrink-0 overflow-hidden rounded-[9px]"
                 />
                 <span className="min-w-0">
-                  <span className="block truncate text-[15.5px] font-[540] tracking-[-0.01em]">{s.title}</span>
-                  <span className="mt-0.5 block truncate text-[13px] text-ink-3">
+                  <span className="block truncate text-[13.95px] font-[540] tracking-[-0.01em]">{s.title}</span>
+                  <span className="mt-0.5 block truncate text-[11.7px] text-ink-3">
                     {s.caller} · {fmtTime(s.duration)}
                   </span>
                   <span
-                    className={`mt-1.5 inline-flex rounded-[6px] px-1.5 py-0.5 text-[11.5px] ${
+                    className={`mt-1.5 inline-flex rounded-[5.4px] px-1.5 py-0.5 text-[10.35px] ${
                       active ? "bg-lime text-ink" : "bg-sink text-ink-2"
                     }`}
                   >
@@ -123,7 +123,7 @@ export function Scenarios() {
                     if (done) seek(0);
                     setUserPlaying(!playing || done);
                   }}
-                  className="grid h-11 w-11 place-items-center rounded-[10px] bg-lime text-ink transition-colors hover:bg-lime-hover"
+                  className="grid h-11 w-11 place-items-center rounded-[9px] bg-lime text-ink transition-colors hover:bg-lime-hover"
                   aria-label={playing ? "Pause" : "Play"}
                 >
                   {playing ? (
@@ -133,7 +133,7 @@ export function Scenarios() {
                   )}
                 </button>
                 <div>
-                  <div className="text-[15px] font-[540]">{sc.title}</div>
+                  <div className="text-[13.5px] font-[540]">{sc.title}</div>
                   <div className="t-label text-ink-3">
                     {fmtTime(t)} / {fmtTime(sc.duration)}
                   </div>
@@ -145,7 +145,7 @@ export function Scenarios() {
                     key={sp}
                     type="button"
                     onClick={() => setSpeed(sp)}
-                    className={`rounded-[8px] px-2.5 py-1.5 text-[13px] ${speed === sp ? "bg-ink text-bone" : "bg-sink text-ink-2"}`}
+                    className={`rounded-[7.2px] px-2.5 py-1.5 text-[11.7px] ${speed === sp ? "bg-ink text-bone" : "bg-sink text-ink-2"}`}
                   >
                     {sp}×
                   </button>
@@ -156,7 +156,7 @@ export function Scenarios() {
                     setSound((s) => !s);
                     window.speechSynthesis?.cancel();
                   }}
-                  className={`flex items-center gap-2 rounded-[8px] px-2.5 py-1.5 text-[13px] ${sound ? "bg-ink text-bone" : "bg-sink text-ink-2"}`}
+                  className={`flex items-center gap-2 rounded-[7.2px] px-2.5 py-1.5 text-[11.7px] ${sound ? "bg-ink text-bone" : "bg-sink text-ink-2"}`}
                   aria-pressed={sound}
                   title="Uses your browser's built-in voices — a preview, not our voice"
                 >
@@ -174,15 +174,15 @@ export function Scenarios() {
                 const caller = u.who === "caller";
                 return (
                   <li key={u.t0} className="grid grid-cols-[4.5rem_1fr] gap-3">
-                    <span className="flex items-center gap-1.5 pt-[3px] text-[12.5px] text-ink-3">
+                    <span className="flex items-center gap-1.5 pt-[2.7px] text-[11.25px] text-ink-3">
                       {caller ? (
-                        <span className="h-2 w-2 rounded-[2px] bg-lime-deep" />
+                        <span className="h-2 w-2 rounded-[1.8px] bg-lime-deep" />
                       ) : (
-                        <Mark className="h-[10px] w-auto text-ink" title="" />
+                        <Mark className="h-[9px] w-auto text-ink" title="" />
                       )}
                       {caller ? sc.caller : "Agent"}
                     </span>
-                    <p className={caller ? "speech-caller text-[21px] leading-[1.2] text-ink" : "text-[15.5px] leading-[1.5] text-ink-2"}>
+                    <p className={caller ? "speech-caller text-[18.9px] leading-[1.2] text-ink" : "text-[13.95px] leading-[1.5] text-ink-2"}>
                       <SpokenWords text={u.text} progress={p} voice={u.who} cut={u.cut} ghost={0.2} />
                     </p>
                   </li>
@@ -202,20 +202,20 @@ export function Scenarios() {
                     initial={false}
                     animate={{ opacity: on ? 1 : 0.3, x: on ? 0 : -4 }}
                     transition={{ duration: 0.35, ease: ease.out }}
-                    className="flex items-start gap-3 rounded-[12px] border border-line bg-paper px-3.5 py-3"
+                    className="flex items-start gap-3 rounded-[10.8px] border border-line bg-paper px-3.5 py-3"
                   >
                     <span
-                      className={`mt-[3px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] text-[11px] ${
+                      className={`mt-[2.7px] grid h-[16.2px] w-[16.2px] shrink-0 place-items-center rounded-[4.5px] text-[9.9px] ${
                         !on ? "bg-sink text-ink-3" : a.tone === "slow" || a.tone === "stop" ? "bg-fault-tint text-fault" : "bg-lime text-ink"
                       }`}
                     >
                       {a.tone === "stop" ? "!" : a.tone === "slow" ? "~" : "✓"}
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-[14px] font-[520]">{a.system}</span>
-                      <span className="block text-[13.5px] text-ink-2">{a.text}</span>
+                      <span className="block text-[12.6px] font-[520]">{a.system}</span>
+                      <span className="block text-[12.15px] text-ink-2">{a.text}</span>
                     </span>
-                    <span className="t-label ml-auto pt-[2px] text-ink-3">{fmtTime(a.at)}</span>
+                    <span className="t-label ml-auto pt-[1.8px] text-ink-3">{fmtTime(a.at)}</span>
                   </motion.li>
                 );
               })}
@@ -230,13 +230,13 @@ export function Scenarios() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ type: "spring", stiffness: 165, damping: 17.5 }}
-                    className="rounded-[14px] bg-ink p-5 text-bone"
+                    className="rounded-[12.6px] bg-ink p-5 text-bone"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[17px] font-[540]">{sc.outcome.label}</span>
-                      <span className="rounded-[6px] bg-lime px-2 py-0.5 text-[12px] text-ink">{sc.outcome.checks}</span>
+                      <span className="text-[15.3px] font-[540]">{sc.outcome.label}</span>
+                      <span className="rounded-[5.4px] bg-lime px-2 py-0.5 text-[10.8px] text-ink">{sc.outcome.checks}</span>
                     </div>
-                    <div className="mt-1.5 text-[13.5px] text-bone/60">Evaluated the moment the call ended.</div>
+                    <div className="mt-1.5 text-[12.15px] text-bone/60">Evaluated the moment the call ended.</div>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -244,9 +244,9 @@ export function Scenarios() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-center gap-3 rounded-[14px] border border-dashed border-line-2 p-5 text-[14px] text-ink-3"
+                    className="flex items-center gap-3 rounded-[12.6px] border border-dashed border-line-2 p-5 text-[12.6px] text-ink-3"
                   >
-                    <Mark spinning={playing} maxSpeed={9} className="h-[16px] w-auto text-ink" title="" trail={false} />
+                    <Mark spinning={playing} maxSpeed={9} className="h-[14.4px] w-auto text-ink" title="" trail={false} />
                     {playing ? "Call in progress…" : "Press play to hear the call"}
                   </motion.div>
                 )}
@@ -275,7 +275,7 @@ function Wave({ sc, t, onSeek }: { sc: Scenario; t: number; onSeek: (s: number) 
   return (
     <button
       type="button"
-      className="mt-6 flex h-14 w-full items-center gap-[2px]"
+      className="mt-6 flex h-14 w-full items-center gap-[1.8px]"
       aria-label="Seek within the call"
       onClick={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
@@ -285,7 +285,7 @@ function Wave({ sc, t, onSeek }: { sc: Scenario; t: number; onSeek: (s: number) 
       {bars.map((b, i) => (
         <span
           key={i}
-          className={`flex-1 rounded-[2px] transition-colors duration-200 ${
+          className={`flex-1 rounded-[1.8px] transition-colors duration-200 ${
             b.who === "caller" ? "bg-lime-deep" : b.who === "agent" ? "bg-ink" : "bg-line-2"
           }`}
           style={{ height: `${b.h * 100}%`, opacity: b.at <= t ? 1 : 0.22 }}

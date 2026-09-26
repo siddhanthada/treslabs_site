@@ -28,11 +28,11 @@ export function Capabilities() {
             transition={{ duration: 0.6, ease: ease.out, delay: i * 0.07 }}
           >
             <Card className="h-full p-7">
-              <span className="grid h-11 w-11 place-items-center rounded-[10px] bg-lime text-ink">
+              <span className="grid h-11 w-11 place-items-center rounded-[9px] bg-lime text-ink">
                 <Icon name={it.i} />
               </span>
-              <h3 className="mt-6 text-[19px] font-[540] tracking-[-0.015em]">{it.t}</h3>
-              <p className="mt-2 text-[15px] leading-[1.5] text-ink-2">{it.d}</p>
+              <h3 className="mt-6 text-[17.1px] font-[540] tracking-[-0.015em]">{it.t}</h3>
+              <p className="mt-2 text-[13.5px] leading-[1.5] text-ink-2">{it.d}</p>
             </Card>
           </motion.div>
         ))}
