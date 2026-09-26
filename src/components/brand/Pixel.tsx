@@ -79,10 +79,10 @@ export function Pixel({
       H = r.height;
       cell = W / cols;
       rows = Math.max(1, Math.round(H / cell));
+      // Backing store at device resolution; CSS size stays 100% of the frame so
+      // page-level zoom never scales the canvas twice.
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
-      canvas.style.width = `${W}px`;
-      canvas.style.height = `${H}px`;
 
       // crop the photo to the grid's aspect around the focus point
       const aspect = cols / rows;
@@ -227,7 +227,7 @@ export function Pixel({
 
   return (
     <div ref={host} className={className} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
-      <canvas ref={cv} className="block" />
+      <canvas ref={cv} className="block h-full w-full" />
     </div>
   );
 }

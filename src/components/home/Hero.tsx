@@ -71,7 +71,7 @@ export function Hero() {
   const thinking = t > 2.6 && t < 4.2;
 
   return (
-    <section ref={ref} id="top" className="flex min-h-svh items-center pt-[var(--nav-h)]">
+    <section ref={ref} id="top" className="flex min-h-[calc(100svh/0.9)] items-center pt-[var(--nav-h)]">
       <div className="wrap grid w-full items-center gap-12 py-12 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-5">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>

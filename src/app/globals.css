@@ -65,6 +65,8 @@
 }
 
 html {
+  /* The site is designed at 90% scale — everything, uniformly. */
+  zoom: 0.9;
   background: var(--color-bone);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
