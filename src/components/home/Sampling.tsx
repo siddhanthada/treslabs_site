@@ -18,24 +18,38 @@ export function Sampling() {
   const reduce = useReducedMotion();
   const [tab, setTab] = useState(0);
   const [auto, setAuto] = useState(true);
+  const [early, setEarly] = useState(false);
+  const go = (i: number) => {
+    if (i === 0) setEarly(false);
+    setTab(i);
+  };
 
-  const { fail, qa } = useMemo(() => {
+  const { fail, qa, fillOrder } = useMemo(() => {
     const r = mulberry32(7);
     const idx = Array.from({ length: 540 }, (_, i) => i).sort(() => r() - 0.5);
     const fail = new Set(idx.slice(0, 36));
     const qa = new Set([idx[3], ...idx.slice(36, 46)]);
-    return { fail, qa };
+    // failures surface one at a time, in a scattered order
+    const fillOrder = new Map(idx.slice(0, 36).map((v, n) => [v, n]));
+    return { fail, qa, fillOrder };
   }, []);
 
   useEffect(() => {
     if (!inView || reduce || !auto) return;
-    const id = window.setTimeout(() => setTab((t) => (t + 1) % TABS.length), 3200);
+    const id = window.setTimeout(() => go((tab + 1) % TABS.length), 3200);
     return () => window.clearTimeout(id);
   }, [tab, inView, reduce, auto]);
 
+  // Failures start appearing while "Calls" is still showing, so the grid is never empty.
+  useEffect(() => {
+    if (tab !== 0 || !inView) return;
+    const id = window.setTimeout(() => setEarly(true), reduce ? 0 : 900);
+    return () => window.clearTimeout(id);
+  }, [tab, inView, reduce]);
+
   const fill = (i: number) => {
     const f = fail.has(i);
-    if (tab === 0) return "var(--color-sink)";
+    if (tab === 0) return early && f ? "var(--color-fault)" : "var(--color-sink)";
     if (tab === 1) return f ? "var(--color-fault)" : "var(--color-sink)";
     if (tab === 2) return qa.has(i) ? (f ? "var(--color-fault)" : "var(--color-ink)") : "var(--color-sink)";
     return f ? "var(--color-fault)" : "var(--color-lime)";
@@ -51,17 +65,21 @@ export function Sampling() {
       <div ref={ref}>
         <Card className="grid items-center gap-10 p-6 md:p-10 lg:grid-cols-2 lg:gap-16">
           <div className="grid gap-[3.6px]" style={{ gridTemplateColumns: "repeat(27, minmax(0, 1fr))" }} aria-hidden>
-            {Array.from({ length: 540 }, (_, i) => (
-              <span
-                key={i}
-                className="aspect-square rounded-full transition-[background-color,transform] duration-500"
-                style={{
-                  backgroundColor: fill(i),
-                  transitionDelay: tab === 3 ? `${(i % 27) * 14}ms` : "0ms",
-                  transform: tab === 2 && qa.has(i) ? "scale(1.25)" : "scale(1)",
-                }}
-              />
-            ))}
+            {Array.from({ length: 540 }, (_, i) => {
+              const order = (tab === 0 && early) || tab === 1 ? fillOrder.get(i) : undefined;
+              return (
+                <span
+                  key={i}
+                  className="aspect-square rounded-full transition-[background-color,transform] duration-500"
+                  style={{
+                    backgroundColor: fill(i),
+                    transitionDelay:
+                      order !== undefined && !reduce ? `${order * 60}ms` : tab === 3 ? `${(i % 27) * 14}ms` : "0ms",
+                    transform: tab === 2 && qa.has(i) ? "scale(1.25)" : "scale(1)",
+                  }}
+                />
+              );
+            })}
           </div>
 
           <div>
@@ -72,7 +90,7 @@ export function Sampling() {
                   role="tab"
                   aria-selected={tab === i}
                   onClick={() => {
-                    setTab(i);
+                    go(i);
                     setAuto(false);
                   }}
                   className={`rounded-[9px] px-4 py-2 text-[12.6px] transition-colors ${

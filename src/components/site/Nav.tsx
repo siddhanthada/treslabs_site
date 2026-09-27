@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Logo } from "@/components/brand/Logo";
 import { ease } from "@/lib/motion";
@@ -16,13 +16,51 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(true);
+  const [hidden, setHidden] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
+  const [hover, setHover] = useState<string | null>(null);
+  // While a nav click is scrolling the page, the nav stays put.
+  const pinned = useRef(false);
+  const pin = () => {
+    pinned.current = true;
+    setHidden(false);
+    // Release once the smooth scroll has settled (no scroll events for a moment).
+    let quiet = 0;
+    const release = () => {
+      pinned.current = false;
+      window.clearTimeout(quiet);
+      window.removeEventListener("scroll", wait);
+    };
+    const wait = () => {
+      window.clearTimeout(quiet);
+      quiet = window.setTimeout(release, 200);
+    };
+    window.addEventListener("scroll", wait, { passive: true });
+    wait();
+  };
 
   useEffect(() => {
+    let lastY = window.scrollY;
     const on = () => {
-      setScrolled(window.scrollY > 8);
+      const y0 = window.scrollY;
+      setScrolled(y0 > 8);
+      // Slide away while reading down; come back the moment the reader scrolls up.
+      if (y0 < 120 || pinned.current) setHidden(false);
+      else if (y0 > lastY + 4) setHidden(true);
+      else if (y0 < lastY - 4) setHidden(false);
+      if (Math.abs(y0 - lastY) > 4) lastY = y0;
+      // Which section is being read.
+      const mid = window.innerHeight * 0.4;
+      const current = navLinks.find((l) => {
+        const r = document.querySelector(l.href)?.getBoundingClientRect();
+        return r && r.top <= mid && r.bottom > mid;
+      });
+      setActive(current?.href ?? null);
       // Take the tone of whatever section sits under the nav.
       const y = 32;
-      const under = [...document.querySelectorAll<HTMLElement>("[data-nav='dark']")].some((el) => {
+      const under = [
+        ...document.querySelectorAll<HTMLElement>("[data-nav='dark']"),
+      ].some((el) => {
         const r = el.getBoundingClientRect();
         return r.top <= y && r.bottom >= y;
       });
@@ -41,31 +79,96 @@ export function Nav() {
   }, [open]);
 
   return (
-    <header
+    <motion.header
+      initial={false}
+      animate={{ y: hidden && !open ? "-100%" : "0%" }}
+      transition={{
+        duration: hidden && !open ? 0.35 : 0.5,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       className={`fixed inset-x-0 top-0 z-50 h-[var(--nav-h)] backdrop-blur-[5.4px] transition-[background-color,box-shadow,color] duration-500 ${
         dark ? "bg-carbon/80 text-on-carbon" : "bg-bone/92 text-ink"
       } ${scrolled ? (dark ? "shadow-[0_1px_0_var(--color-carbon-line)]" : "shadow-[0_1px_0_var(--color-line)]") : ""}`}
     >
-      <nav className="wrap flex h-full items-center justify-between" aria-label="Main">
-        <a href="#top" aria-label="Treslabs home" className="-m-2 p-2">
+      <nav
+        className="wrap flex h-full items-center justify-between"
+        aria-label="Main"
+      >
+        <a
+          href="#top"
+          onClick={pin}
+          aria-label="Treslabs home"
+          className="-m-2 p-2"
+        >
           <Logo intro tone={dark ? "bone" : "ink"} />
         </a>
 
-        <ul className="hidden items-center gap-8 md:flex">
-          {navLinks.map((l) => (
-            <li key={l.href}>
-              <a
-                href={l.href}
-                className={`text-[13.05px] transition-colors ${dark ? "text-on-carbon-2 hover:text-on-carbon" : "text-ink-2 hover:text-ink"}`}
-              >
-                {l.label}
-              </a>
-            </li>
-          ))}
+        <ul
+          className="hidden items-center gap-1 md:flex"
+          onMouseLeave={() => setHover(null)}
+        >
+          {navLinks.map((l) => {
+            const on = active === l.href;
+            return (
+              <li key={l.href} className="relative">
+                <a
+                  href={l.href}
+                  onClick={pin}
+                  onMouseEnter={() => setHover(l.href)}
+                  onFocus={() => setHover(l.href)}
+                  onBlur={() => setHover(null)}
+                  aria-current={on ? "location" : undefined}
+                  className={`relative isolate block rounded-[8px] px-3.5 py-2 text-[14.4px] transition-colors duration-200 ${
+                    dark
+                      ? on || hover === l.href
+                        ? "text-on-carbon"
+                        : "text-on-carbon-2"
+                      : on || hover === l.href
+                        ? "text-ink"
+                        : "text-ink-2"
+                  }`}
+                >
+                  {hover === l.href && (
+                    <motion.span
+                      layoutId="nav-hover"
+                      className={`absolute inset-0 -z-10 rounded-[8px] ${dark ? "bg-on-carbon/10" : "bg-ink/[0.055]"}`}
+                      transition={{
+                        type: "spring",
+                        stiffness: 520,
+                        damping: 40,
+                      }}
+                    />
+                  )}
+                  {l.label}
+                </a>
+                <AnimatePresence>
+                  {on && (
+                    <motion.span
+                      layoutId="nav-active"
+                      initial={{ opacity: 0, scale: 0.4 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.4 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 34,
+                      }}
+                      className="absolute -bottom-[7px] left-[calc(50%-3px)] h-[6px] w-[6px] rounded-[1.8px] bg-lime"
+                      aria-hidden
+                    />
+                  )}
+                </AnimatePresence>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="flex items-center gap-2">
-          <a href="#contact" className="btn btn-lime hidden !h-[34.2px] !px-4 !text-[12.6px] md:inline-flex">
+          <a
+            href="#contact"
+            onClick={pin}
+            className="btn btn-lime hidden md:inline-flex"
+          >
             Book a demo
           </a>
           <button
@@ -106,12 +209,19 @@ export function Nav() {
                   key={l.href}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: ease.out, delay: 0.04 * i }}
+                  transition={{
+                    duration: 0.5,
+                    ease: ease.out,
+                    delay: 0.04 * i,
+                  }}
                   className="border-b border-line"
                 >
                   <a
                     href={l.href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      pin();
+                      setOpen(false);
+                    }}
                     className="flex items-baseline justify-between py-5 text-[27px] tracking-[-0.03em]"
                   >
                     {l.label}
@@ -121,13 +231,20 @@ export function Nav() {
               ))}
             </ul>
             <div className="wrap mt-8">
-              <a href="#contact" onClick={() => setOpen(false)} className="btn btn-ink w-full">
+              <a
+                href="#contact"
+                onClick={() => {
+                  pin();
+                  setOpen(false);
+                }}
+                className="btn btn-ink w-full"
+              >
                 Book a demo
               </a>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }

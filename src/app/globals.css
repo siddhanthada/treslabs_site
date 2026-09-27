@@ -60,7 +60,7 @@
   --dawn: linear-gradient(90deg, #3a3af0 0%, #8f62d9 38%, #de8a86 68%, #f1b862 100%);
   --gutter: clamp(18px, 3.6vw, 50.4px);
   --wrap: 1224px;
-  --nav-h: 57.6px;
+  --nav-h: 68px;
   --section-y: clamp(86.4px, 11.7vw, 165.6px);
 }
 
@@ -73,6 +73,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scroll-padding-top: var(--nav-h);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {

@@ -10,16 +10,16 @@ type LogoProps = {
 
 /**
  * Lockup per the brand spec: mark ink height ≈ 2.2× the wordmark ascender,
- * gap = 0.2× mark height, "tres" 600 / "labs" 425 separated by weight and tone.
+ * gap = 0.2× mark height. One solid colour for presence; "tres" 680 / "labs" 480
+ * are separated by weight alone.
  */
 export function Logo({ className = "", intro, spinning, tone = "ink" }: LogoProps) {
-  const dim = tone === "ink" ? "text-ink-3" : "text-on-carbon-3";
   return (
-    <span className={`inline-flex items-center gap-[5.4px] ${className}`}>
-      <Mark intro={intro} spinning={spinning} maxSpeed={11} className="h-[25.2px] w-auto" />
-      <span className="text-[17.1px] leading-none tracking-[-0.035em] select-none">
-        <span className="font-[600]">tres</span>
-        <span className={`font-[425] ${dim}`}>labs</span>
+    <span className={`inline-flex items-center gap-[6.3px] ${className}`}>
+      <Mark intro={intro} spinning={spinning} maxSpeed={11} className="h-[29px] w-auto" />
+      <span className={`text-[19.8px] leading-none tracking-[-0.035em] select-none ${tone === "ink" ? "text-ink" : "text-on-carbon"}`}>
+        <span className="font-[680]">tres</span>
+        <span className="font-[480]">labs</span>
       </span>
     </span>
   );
