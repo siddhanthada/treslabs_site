@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { contact } from "@/content/scenario";
@@ -12,11 +12,11 @@ import { Pixel, PEOPLE } from "@/components/brand/Pixel";
 import { ease } from "@/lib/motion";
 
 /*
-  Hero: calls keep coming. The middle caller is live — a real photo, a real
-  conversation. Their voice drops down into the call flow below, which plays
+  Hero: calls keep coming. A conveyor of callers — waiting on the left, live
+  in the middle, finished on the right. The live call is a real photo and a
+  real conversation; its voice drops into the call flow below, which plays
   the same call on the same clock. When the call ends it resolves into pixels
-  (the call as Treslabs keeps it), joins the finished calls, and the next
-  caller comes through.
+  (the call as Treslabs keeps it) and everything moves one step right.
 
   Illustrative people (Unsplash), fictional calls for Harrow & Finch.
 */
@@ -24,6 +24,8 @@ import { ease } from "@/lib/motion";
 type Person = { src: string; focus: { x: number; y: number } };
 type Scene = {
   who: Person;
+  /** How far to crop in on the face and phone. */
+  zoom: number;
   lines: [caller: string, agent: string, reply: string];
   systems: [string, string][];
   outcome: [string, string];
@@ -33,7 +35,8 @@ type Scene = {
 
 const SCENES: Scene[] = [
   {
-    who: PEOPLE.arjun,
+    who: PEOPLE.hero,
+    zoom: 1.3,
     lines: ["My lamp was meant to come Monday.", "It’s out for delivery — with you by six today.", "Oh — brilliant. Thank you."],
     systems: [
       ["Customer record", "Caller verified"],
@@ -46,7 +49,8 @@ const SCENES: Scene[] = [
     dur: "1:48",
   },
   {
-    who: PEOPLE.priya,
+    who: PEOPLE.lena,
+    zoom: 1.15,
     lines: ["I won’t be home on Friday for the delivery.", "No problem — Monday, 8 to 12 is free. Shall I book it?", "Monday’s perfect."],
     systems: [
       ["Customer record", "Caller verified"],
@@ -59,7 +63,8 @@ const SCENES: Scene[] = [
     dur: "2:10",
   },
   {
-    who: PEOPLE.suit,
+    who: PEOPLE.maya,
+    zoom: 1.35,
     lines: ["The lamp base arrived cracked.", "Sorry about that — I’ve sent an £84 refund to Sam to approve.", "Great, thanks."],
     systems: [
       ["Customer record", "Caller verified"],
@@ -72,7 +77,8 @@ const SCENES: Scene[] = [
     dur: "3:02",
   },
   {
-    who: PEOPLE.rose,
+    who: PEOPLE.leo,
+    zoom: 1,
     lines: ["I’ve moved — can you update my address?", "Done. Both open orders now go to 14 Park Road.", "Perfect, thank you."],
     systems: [
       ["Customer record", "Caller verified"],
@@ -85,7 +91,8 @@ const SCENES: Scene[] = [
     dur: "1:21",
   },
   {
-    who: PEOPLE.ramesh,
+    who: PEOPLE.daniel,
+    zoom: 1.3,
     lines: ["Can I speak to a person, please?", "Of course — putting you through to Jess, with the details.", "Thank you."],
     systems: [
       ["Customer record", "Caller verified"],
@@ -101,27 +108,62 @@ const SCENES: Scene[] = [
 
 /** One call, in seconds. Every scene runs on the same clock. */
 const T = {
-  caller: 0.3,
-  drop: [0.4, 4.6], // the caller's voice leaves the hero
-  entry: [1.1, 5.3], // …and reaches Treslabs
-  think: [1.1, 1.6],
-  systems: [1.6, 1.9, 2.2, 3.6], // the last one is the follow-up action
-  agent: 2.4,
-  reply: 4.6,
-  outcome: 5.6,
-  evaluate: 6.2,
-  ends: 7.3, // the call resolves into pixels
-  loop: 9.4,
+  caller: 0.9, // after the conveyor has moved the caller into place
+  drop: [1.0, 5.2], // the caller's voice leaves the hero
+  entry: [1.7, 5.9], // …and reaches Treslabs
+  think: [1.7, 2.2],
+  systems: [2.2, 2.5, 2.8, 4.2], // the last one is the follow-up action
+  agent: 3.0,
+  reply: 5.2,
+  outcome: 6.2,
+  evaluate: 6.8,
+  ends: 7.9, // the call resolves into pixels (1s)…
+  loop: 9.1, // …then straight on to the next caller
 };
+const MOVE = 0.7; // seconds for the conveyor to step
 const DROP_DUR = 0.7;
 
-/** Side slots, outer → inner → inner → outer, showing the calls that came before. */
-const SLOTS = [
-  { back: 3, h: 0.66, show: "xl" },
-  { back: 1, h: 0.82, show: "md" },
-  { back: 2, h: 0.82, show: "md" },
-  { back: 4, h: 0.66, show: "xl" },
-] as const;
+/**
+ * Five slots, left → right: next-but-one, next, live, just finished, finished.
+ * Positions are % of the row; o = visible at this breakpoint.
+ */
+type Geo = { l: number; w: number; h: number; o: number };
+const GEO: Record<"sm" | "md" | "xl", Geo[]> = {
+  xl: [
+    { l: 3.1, w: 14, h: 0.66, o: 1 },
+    { l: 18.3, w: 17, h: 0.82, o: 1 },
+    { l: 36.5, w: 27, h: 1, o: 1 },
+    { l: 64.7, w: 17, h: 0.82, o: 1 },
+    { l: 82.9, w: 14, h: 0.66, o: 1 },
+  ],
+  md: [
+    { l: 10.5, w: 22, h: 0.82, o: 0 },
+    { l: 10.5, w: 22, h: 0.82, o: 1 },
+    { l: 34, w: 32, h: 1, o: 1 },
+    { l: 67.5, w: 22, h: 0.82, o: 1 },
+    { l: 67.5, w: 22, h: 0.82, o: 0 },
+  ],
+  sm: [
+    { l: 0, w: 100, h: 1, o: 0 },
+    { l: 0, w: 100, h: 1, o: 0 },
+    { l: 0, w: 100, h: 1, o: 1 },
+    { l: 0, w: 100, h: 1, o: 0 },
+    { l: 0, w: 100, h: 1, o: 0 },
+  ],
+};
+const geoStyle = (g: Geo) => ({ left: `${g.l}%`, width: `${g.w}%`, height: `${g.h * 100}%`, top: `${((1 - g.h) / 2) * 100}%`, opacity: g.o });
+
+const subscribe = (cb: () => void) => {
+  window.addEventListener("resize", cb);
+  return () => window.removeEventListener("resize", cb);
+};
+function useBreakpoint(): "sm" | "md" | "xl" {
+  return useSyncExternalStore(
+    subscribe,
+    () => (window.innerWidth >= 1280 ? "xl" : window.innerWidth >= 768 ? "md" : "sm"),
+    () => "xl",
+  );
+}
 
 const pixelUrl = (src: string) => `${src}?w=640&q=75&auto=format`;
 
@@ -154,11 +196,12 @@ export function Hero() {
     });
   }, []);
 
+  const bp = useBreakpoint();
   const n = SCENES.length;
-  const idx = loop % n;
-  const scene = SCENES[idx];
+  const sceneOf = (k: number) => SCENES[((k % n) + n) % n];
+  const scene = sceneOf(loop);
   const ended = t >= T.ends;
-  const speaking = (t > T.caller && t < 1.5) || (t > T.agent && t < 3.5) || (t > T.reply && t < 5.4);
+  const speaking = (t > T.caller && t < 2.1) || (t > T.agent && t < 4.1) || (t > T.reply && t < 6);
   const caller = !ended && t >= T.caller ? (t >= T.reply ? scene.lines[2] : scene.lines[0]) : null;
   const agent = !ended && t >= T.agent ? scene.lines[1] : null;
 
@@ -208,118 +251,35 @@ export function Hero() {
           transition={{ duration: 0.9, ease: ease.out, delay: 0.25 }}
           className="wrap mt-[clamp(28px,4.5svh,52px)] w-full"
         >
-          <div
-            className="flex items-center justify-center gap-3"
-            style={{ height: "clamp(240px, calc(100svh - 530px), 380px)" }}
-          >
-            {SLOTS.slice(0, 2).map((s) => (
-              <SideTile key={s.back} slot={s} scene={SCENES[(idx - s.back + n * 10) % n]} />
-            ))}
-
-            <div className="relative z-10 h-full w-full max-w-[340px] shrink-0 md:w-[27%]">
-              {/* live: a real person on a real call; when it ends it becomes pixels — the call as data */}
-              <div className="absolute inset-0 overflow-hidden rounded-[14.4px] bg-sink ring-1 ring-ink/10">
-                {SCENES.map((s, i) => (
+          <div className="relative" style={{ height: "clamp(240px, calc(100svh - 530px), 380px)" }}>
+            <AnimatePresence initial={false}>
+              {[2, 1, 0, -1, -2].map((d, p) => {
+                const k = loop + d;
+                const mode = d > 0 ? "queue" : d === 0 ? "live" : "done";
+                return (
                   <motion.div
-                    key={s.who.src}
-                    className="absolute inset-0"
-                    initial={false}
-                    animate={{ opacity: i === idx ? 1 : 0 }}
-                    transition={{ duration: 0.6 }}
+                    key={k}
+                    className={`absolute ${mode === "live" ? "z-10" : ""}`}
+                    initial={{ ...geoStyle(GEO[bp][0]), opacity: 0 }}
+                    animate={geoStyle(GEO[bp][p])}
+                    exit={{ opacity: 0, transition: { duration: 0.4 } }}
+                    transition={{ duration: reduce ? 0 : MOVE, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <Image
-                      src={`${s.who.src}?w=900&q=80&auto=format`}
-                      alt={i === idx ? "An illustrative caller on the phone" : ""}
-                      fill
-                      priority={i === 0}
-                      sizes="(min-width: 768px) 340px, 90vw"
-                      className="scale-[1.3] object-cover"
-                      style={{
-                        objectPosition: `${s.who.focus.x * 100}% ${s.who.focus.y * 100}%`,
-                        transformOrigin: `${s.who.focus.x * 100}% ${s.who.focus.y * 100}%`,
-                      }}
+                    <Tile
+                      scene={sceneOf(k)}
+                      mode={mode}
+                      startsDone={k < 0}
+                      ended={mode === "live" && ended}
+                      t={t}
+                      loop={loop}
+                      speaking={speaking}
+                      caller={mode === "live" ? caller : null}
+                      agent={mode === "live" ? agent : null}
                     />
                   </motion.div>
-                ))}
-                <AnimatePresence>
-                  {ended && (
-                    <motion.div
-                      key={`px-${loop}`}
-                      className="absolute inset-0"
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <Pixel src={scene.who.src} focus={scene.who.focus} zoom={1.3} cols={44} build={1} scan={false} className="absolute inset-0" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* call bar */}
-              <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2">
-                <span
-                  className={`flex items-center gap-1.5 rounded-[7.2px] px-2.5 py-1 text-[11.25px] font-[520] transition-colors duration-300 ${
-                    ended ? "bg-ink text-on-carbon" : "bg-lime text-ink"
-                  }`}
-                >
-                  <Phone className="h-3 w-3" />
-                  {ended ? `Ended · ${scene.dur}` : `Live · ${fmt(t)}`}
-                </span>
-                <span className="flex items-center gap-1.5 rounded-[7.2px] bg-paper/95 px-2.5 py-1 text-[11.25px] font-[500] text-ink">
-                  {ended ? (
-                    <>
-                      <span className="grid h-3.5 w-3.5 place-items-center rounded-[3px] bg-lime">
-                        <Check className="h-2.5 w-2.5" />
-                      </span>
-                      Evaluated · 6/6
-                    </>
-                  ) : (
-                    <>
-                      <Mark centered className="h-3 w-3 text-ink" trail={false} title="" />
-                      Answered by Treslabs
-                    </>
-                  )}
-                </span>
-              </div>
-              <AnimatePresence>
-                {!ended && (
-                  <motion.div
-                    key={`voice-${loop}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-x-0 bottom-3 flex justify-center"
-                  >
-                    <div className="rounded-[8px] bg-paper/95 px-2.5 py-1.5">
-                      <Voice active={speaking} />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* the conversation floats off the photo, so the face stays clear */}
-              <AnimatePresence mode="wait">
-                {caller && (
-                  <Bubble key={`${caller}-${loop}`} className="left-3 top-[30%] md:left-[-14%] max-w-[240px] bg-paper text-ink">
-                    <span className="speech-caller text-[15.3px] leading-tight">“{caller}”</span>
-                  </Bubble>
-                )}
-              </AnimatePresence>
-              <AnimatePresence>
-                {agent && (
-                  <Bubble key={`agent-${loop}`} className="right-3 top-[52%] md:right-[-16%] max-w-[250px] bg-ink text-on-carbon">
-                    <span className="flex items-start gap-2 text-[12.6px] leading-snug">
-                      <Mark centered className="mt-[2px] h-3.5 w-3.5 shrink-0 text-lime" trail={false} title="" />
-                      {agent}
-                    </span>
-                  </Bubble>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {SLOTS.slice(2).map((s) => (
-              <SideTile key={s.back} slot={s} scene={SCENES[(idx - s.back + n * 10) % n]} />
-            ))}
+                );
+              })}
+            </AnimatePresence>
           </div>
         </motion.div>
 
@@ -366,41 +326,148 @@ function Bubble({ className, children }: { className: string; children: ReactNod
   );
 }
 
-/** A finished call: kept as pixels, with its outcome. Crossfades as the calls move along. */
-function SideTile({ slot, scene }: { slot: (typeof SLOTS)[number]; scene: Scene }) {
+/**
+ * One caller on the conveyor. Waiting: their photo. Live: the call itself.
+ * Finished: the pixels Treslabs keeps, with the outcome. The pixel layer
+ * mounts when the call ends and stays with the tile, so nothing re-renders.
+ */
+function Tile({
+  scene,
+  mode,
+  startsDone,
+  ended,
+  t,
+  loop,
+  speaking,
+  caller,
+  agent,
+}: {
+  scene: Scene;
+  mode: "queue" | "live" | "done";
+  startsDone: boolean;
+  ended: boolean;
+  t: number;
+  loop: number;
+  speaking: boolean;
+  caller: string | null;
+  agent: string | null;
+}) {
+  const { who, zoom } = scene;
+  const [instant] = useState(startsDone);
+  const pixels = mode === "done" || ended;
+  const origin = `${who.focus.x * 100}% ${who.focus.y * 100}%`;
   return (
-    <div
-      className={`relative hidden shrink-0 overflow-hidden rounded-[12.6px] bg-sink ${slot.show === "md" ? "w-[17%] md:block" : "w-[14%] xl:block"}`}
-      style={{ height: `${slot.h * 100}%` }}
-    >
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={scene.who.src}
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Pixel
-            src={scene.who.src}
-            focus={scene.who.focus}
-            zoom={1.4}
-            cols={slot.show === "md" ? 28 : 24}
-            animate={false}
-            scan={false}
-            className="absolute inset-0"
-          />
-          <div className="absolute inset-x-2 bottom-2 rounded-[7.2px] bg-paper/95 px-2 py-1.5">
+    <>
+      <div className={`absolute inset-0 overflow-hidden rounded-[14.4px] bg-sink ${mode === "live" ? "ring-1 ring-ink/10" : ""}`}>
+        <Image
+          src={`${who.src}?w=900&q=80&auto=format`}
+          alt={mode === "live" ? "An illustrative caller on the phone" : ""}
+          fill
+          priority={mode === "live"}
+          sizes="(min-width: 1280px) 330px, (min-width: 768px) 32vw, 90vw"
+          className={`object-cover transition-opacity duration-500 ${mode === "done" ? "opacity-0" : ""}`}
+          style={{ objectPosition: origin, transformOrigin: origin, transform: `scale(${zoom})` }}
+        />
+        {pixels && (
+          <Pixel src={who.src} focus={who.focus} zoom={zoom} cols={40} build={1} animate={!instant} scan={false} className="absolute inset-0" />
+        )}
+      </div>
+
+      {mode === "queue" && (
+        <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-[7.2px] bg-paper/95 px-2 py-1 text-[11.25px] font-[500] text-ink">
+          <span className="relative flex h-[6px] w-[6px]">
+            <span className="absolute inset-0 animate-ping rounded-full bg-lime-deep/60" />
+            <span className="relative h-[6px] w-[6px] rounded-full bg-lime-deep" />
+          </span>
+          Incoming
+        </div>
+      )}
+
+      <AnimatePresence>
+        {mode === "done" && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="absolute inset-x-2 bottom-2 rounded-[7.2px] bg-paper/95 px-2 py-1.5"
+          >
             <div className="flex items-center gap-1.5 truncate text-[11.25px] font-[520] text-ink">
               <Phone className="h-3 w-3 shrink-0 text-lime-deep" />
               {scene.tag}
             </div>
             <div className="t-label mt-0.5 truncate text-ink-3">{scene.dur} · 6/6 checks</div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
-    </div>
+
+      <AnimatePresence>
+        {mode === "live" && (
+          <motion.div
+            key="live"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+          >
+            {/* call bar */}
+            <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2">
+              <span
+                className={`flex items-center gap-1.5 rounded-[7.2px] px-2.5 py-1 text-[11.25px] font-[520] transition-colors duration-300 ${
+                  ended ? "bg-ink text-on-carbon" : "bg-lime text-ink"
+                }`}
+              >
+                <Phone className="h-3 w-3" />
+                {ended ? `Ended · ${scene.dur}` : `Live · ${fmt(t)}`}
+              </span>
+              <span className="flex items-center gap-1.5 truncate rounded-[7.2px] bg-paper/95 px-2.5 py-1 text-[11.25px] font-[500] text-ink">
+                {ended ? (
+                  <>
+                    <span className="grid h-3.5 w-3.5 place-items-center rounded-[3px] bg-lime">
+                      <Check className="h-2.5 w-2.5" />
+                    </span>
+                    Evaluated · 6/6
+                  </>
+                ) : (
+                  <>
+                    <Mark centered className="h-3 w-3 shrink-0 text-ink" trail={false} title="" />
+                    Answered by Treslabs
+                  </>
+                )}
+              </span>
+            </div>
+            <AnimatePresence>
+              {!ended && (
+                <motion.div exit={{ opacity: 0 }} className="absolute inset-x-0 bottom-3 flex justify-center">
+                  <div className="rounded-[8px] bg-paper/95 px-2.5 py-1.5">
+                    <Voice active={speaking} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* the conversation floats off the photo, so the face stays clear */}
+      <AnimatePresence mode="wait">
+        {caller && (
+          <Bubble key={`${caller}-${loop}`} className="left-3 top-[30%] md:left-[-14%] max-w-[240px] bg-paper text-ink">
+            <span className="speech-caller text-[15.3px] leading-tight">“{caller}”</span>
+          </Bubble>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {agent && (
+          <Bubble key={`agent-${loop}`} className="right-3 top-[52%] md:right-[-16%] max-w-[250px] bg-ink text-on-carbon">
+            <span className="flex items-start gap-2 text-[12.6px] leading-snug">
+              <Mark centered className="mt-[2px] h-3.5 w-3.5 shrink-0 text-lime" trail={false} title="" />
+              {agent}
+            </span>
+          </Bubble>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 

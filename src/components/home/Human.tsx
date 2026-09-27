@@ -10,6 +10,7 @@ import { ease } from "@/lib/motion";
 const SIDES = [
   {
     who: PEOPLE.ana,
+    zoom: 1.2,
     tag: "Tuesday · v14",
     dur: "1:12",
     line: "“No — don’t worry. I’ll sort it out myself.”",
@@ -17,7 +18,8 @@ const SIDES = [
     bad: true,
   },
   {
-    who: PEOPLE.lena,
+    who: PEOPLE.nina,
+    zoom: 1.9,
     tag: "Thursday · v15",
     dur: "0:48",
     line: "“Oh — brilliant. Before six?”",
@@ -50,6 +52,7 @@ export function Human() {
                   src={s.who.src}
                   focus={s.who.focus}
                   cols={84}
+                  zoom={s.zoom}
                   animate={false}
                   className="aspect-[16/10] w-full overflow-hidden rounded-[10.8px]"
                   alt=""

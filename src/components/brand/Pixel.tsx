@@ -65,6 +65,8 @@ export function Pixel({
 
     let raf = 0;
     let started = false;
+    let settled = false;
+    let wanted = false; // seen on screen; start as soon as it has a size
     let cancelled = false;
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -81,6 +83,8 @@ export function Pixel({
 
     const prepare = () => {
       const r = el.getBoundingClientRect();
+      // mid-animation a frame can measure 0 wide; keep the last good grid
+      if (r.width < 4 || r.height < 4) return false;
       W = r.width;
       H = r.height;
       cell = W / cols;
@@ -105,7 +109,7 @@ export function Pixel({
       off.width = cols;
       off.height = rows;
       const o = off.getContext("2d", { willReadFrequently: true });
-      if (!o) return;
+      if (!o) return false;
       o.imageSmoothingQuality = "high";
       o.drawImage(img, sx, sy, sw, sh, 0, 0, cols, rows);
       const d = o.getImageData(0, 0, cols, rows).data;
@@ -164,9 +168,11 @@ export function Pixel({
       });
       order = new Float32Array(cols * rows);
       for (let i = 0; i < order.length; i++) order[i] = Math.random();
+      return true;
     };
 
     const draw = (elapsed: number) => {
+      if (!stages.length) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
       const S = BLOCKS.length;
@@ -194,8 +200,8 @@ export function Pixel({
 
     const start = () => {
       if (started || cancelled || !img.complete || !img.naturalWidth) return;
+      if (!prepare()) return; // not laid out yet — the ResizeObserver retries
       started = true;
-      prepare();
       if (!animate) {
         draw(0);
         canvas.style.opacity = "1";
@@ -211,6 +217,12 @@ export function Pixel({
           draw(e);
           last = now;
         }
+        // nothing left to animate: stop, and redraw only on resize
+        if (!scan && e > build + 0.2) {
+          draw(e);
+          settled = true;
+          return;
+        }
         if (reduce) return;
         raf = requestAnimationFrame(loop);
       };
@@ -219,16 +231,21 @@ export function Pixel({
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) start();
+        if (entry.isIntersecting) {
+          wanted = true;
+          start();
+        }
       },
       { threshold: 0.25 },
     );
     img.onload = () => io.observe(el);
 
     const ro = new ResizeObserver(() => {
-      if (!started) return;
-      prepare();
-      if (!animate) draw(0);
+      if (!started) {
+        if (wanted) start();
+        return;
+      }
+      if (prepare() && (!animate || settled)) draw(1e6);
     });
     ro.observe(el);
 
@@ -263,9 +280,10 @@ export const PEOPLE = {
   suit: { src: "https://images.unsplash.com/photo-1758525589111-eaba67028b36", focus: { x: 0.5, y: 0.38 } },
   rose: { src: "https://images.unsplash.com/photo-1734336037902-e8ffd46704cd", focus: { x: 0.6, y: 0.42 } },
   mira: { src: "https://images.unsplash.com/photo-1698891667770-c611cf57d82c", focus: { x: 0.5, y: 0.4 } },
-  arjun: { src: "https://images.unsplash.com/photo-1659353221337-c67b04ed7f8c", focus: { x: 0.37, y: 0.28 } },
-  priya: { src: "https://images.unsplash.com/photo-1733737272264-6af8f1aa41fc", focus: { x: 0.5, y: 0.32 } },
-  ramesh: { src: "https://images.unsplash.com/photo-1569140733895-eabccf089fc3", focus: { x: 0.58, y: 0.3 } },
+  lena: { src: "https://images.unsplash.com/photo-1758876201450-cf77ab8b95bc", focus: { x: 0.6, y: 0.3 } },
+  leo: { src: "https://images.unsplash.com/photo-1758611970051-69f179d83cba", focus: { x: 0.58, y: 0.32 } },
+  maya: { src: "https://images.unsplash.com/photo-1649768662672-6a3aa2250cab", focus: { x: 0.48, y: 0.26 } },
+  daniel: { src: "https://images.unsplash.com/photo-1758519288445-5847dd89f313", focus: { x: 0.6, y: 0.28 } },
+  nina: { src: "https://images.unsplash.com/photo-1758599543146-f263d3b3321e", focus: { x: 0.35, y: 0.28 } },
   ana: { src: "https://images.unsplash.com/photo-1686723726446-8b881f37ce62", focus: { x: 0.52, y: 0.3 } },
-  lena: { src: "https://images.unsplash.com/photo-1758876201450-cf77ab8b95bc", focus: { x: 0.64, y: 0.38 } },
 } as const;
