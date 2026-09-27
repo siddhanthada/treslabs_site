@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { contact } from "@/content/scenario";
 import { Button } from "@/components/site/Button";
 import { Mark } from "@/components/brand/Mark";
+import { Phone } from "@/components/brand/Phone";
 import { Eyebrow } from "@/components/brand/Frame";
 import { Pixel, PEOPLE } from "@/components/brand/Pixel";
 import { ease } from "@/lib/motion";
@@ -15,7 +17,9 @@ import { ease } from "@/lib/motion";
   plays the same call on the same clock.
 */
 
-const LOOP = 14;
+const LOOP = 16;
+/** The call ends here: the live photo resolves into pixels — the call as Treslabs keeps it. */
+const ENDS = 12.4;
 
 /** The live call's conversation, on the loop clock. */
 const LINES = [
@@ -24,12 +28,12 @@ const LINES = [
   { at: 8.8, who: "caller", text: "Oh — brilliant. Thank you." },
 ] as const;
 
-/** Other calls, already handled. Illustrative people, fictional calls. */
+/** Calls already handled — kept as Treslabs sees them. Illustrative people, fictional calls. */
 const SIDE = [
-  { who: PEOPLE.suit, cols: 22, h: 0.66, tag: "Refund · to Sam", show: "xl" },
-  { who: PEOPLE.street, cols: 26, h: 0.82, tag: "Order · resolved", show: "md" },
-  { who: PEOPLE.walking, cols: 26, h: 0.82, tag: "Rebooked · Mon 8–12", show: "md" },
-  { who: PEOPLE.desk, cols: 22, h: 0.66, tag: "Handed to Jess", show: "xl" },
+  { who: PEOPLE.mira, zoom: 1.5, cols: 24, h: 0.66, tag: "Refund → Sam", dur: "3:02", show: "xl" },
+  { who: PEOPLE.suit, zoom: 1.7, cols: 28, h: 0.82, tag: "Order resolved", dur: "1:48", show: "md" },
+  { who: PEOPLE.rose, zoom: 1.2, cols: 28, h: 0.82, tag: "Rebooked · Mon", dur: "2:10", show: "md" },
+  { who: PEOPLE.desk, zoom: 1.5, cols: 24, h: 0.66, tag: "Handed to Jess", dur: "0:52", show: "xl" },
 ] as const;
 
 export function Hero() {
@@ -52,8 +56,9 @@ export function Hero() {
 
   const live = (a: number) => t >= a && t < LOOP - 0.5;
   const speaking = (t > 0.4 && t < 3.2) || (t > 8.8 && t < 10);
-  const caller = [...LINES].reverse().find((l) => l.who === "caller" && t >= l.at && t < LOOP - 0.5);
-  const agent = LINES.find((l) => l.who === "agent" && t >= l.at && t < LOOP - 0.5);
+  const ended = t >= ENDS;
+  const caller = [...LINES].reverse().find((l) => l.who === "caller" && t >= l.at && !ended);
+  const agent = LINES.find((l) => l.who === "agent" && t >= l.at && !ended);
 
   return (
     <div ref={ref}>
@@ -109,22 +114,66 @@ export function Hero() {
               <SideTile key={s.tag} {...s} />
             ))}
             <div className="relative z-10 h-full w-full max-w-[340px] shrink-0 md:w-[27%]">
-              <Pixel
-                src={PEOPLE.hero.src}
-                focus={PEOPLE.hero.focus}
-                cols={44}
-                className="absolute inset-0 overflow-hidden rounded-[14.4px] ring-1 ring-ink/10"
-                alt="An illustrative caller on the phone, rendered in pixels"
-              />
-              <span className="absolute left-3 top-3 flex items-center gap-2 rounded-[7.2px] bg-lime px-2.5 py-1 text-[11.25px] font-[520] text-ink">
-                <span className="h-[6px] w-[6px] rounded-full bg-ink" aria-hidden />
-                Live · {fmt(t)}
-              </span>
-              <div className="absolute inset-x-0 bottom-3 flex justify-center">
-                <div className="rounded-[8px] bg-paper/95 px-2.5 py-1.5">
-                  <Voice active={speaking} />
-                </div>
+              {/* live: a real person on a real call; when it ends it becomes pixels — the call as data */}
+              <div className="absolute inset-0 overflow-hidden rounded-[14.4px] bg-sink ring-1 ring-ink/10">
+                <Image
+                  src={`${PEOPLE.hero.src}?w=900&q=80&auto=format`}
+                  alt="An illustrative caller on the phone"
+                  fill
+                  priority
+                  sizes="(min-width: 768px) 340px, 90vw"
+                  className="object-cover"
+                  style={{ objectPosition: `${PEOPLE.hero.focus.x * 100}% ${PEOPLE.hero.focus.y * 100}%` }}
+                />
+                <AnimatePresence>
+                  {ended && (
+                    <motion.div
+                      key={`px-${loop}`}
+                      className="absolute inset-0"
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <Pixel src={PEOPLE.hero.src} focus={PEOPLE.hero.focus} cols={44} build={1.1} scan={false} className="absolute inset-0" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+
+              {/* call bar */}
+              <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2">
+                <span
+                  className={`flex items-center gap-1.5 rounded-[7.2px] px-2.5 py-1 text-[11.25px] font-[520] transition-colors duration-300 ${
+                    ended ? "bg-ink text-on-carbon" : "bg-lime text-ink"
+                  }`}
+                >
+                  <Phone className="h-3 w-3" />
+                  {ended ? `Ended · ${fmt(ENDS)}` : `Live · ${fmt(t)}`}
+                </span>
+                <span className="flex items-center gap-1.5 rounded-[7.2px] bg-paper/95 px-2.5 py-1 text-[11.25px] font-[500] text-ink">
+                  {ended ? (
+                    <>
+                      <span className="grid h-3.5 w-3.5 place-items-center rounded-[3px] bg-lime">
+                        <Check className="h-2.5 w-2.5" />
+                      </span>
+                      Evaluated · 6/6
+                    </>
+                  ) : (
+                    <>
+                      <Mark centered className="h-3 w-3 text-ink" trail={false} title="" />
+                      Answered by Treslabs
+                    </>
+                  )}
+                </span>
+              </div>
+              <AnimatePresence>
+                {!ended && (
+                  <motion.div exit={{ opacity: 0 }} className="absolute inset-x-0 bottom-3 flex justify-center">
+                    <div className="rounded-[8px] bg-paper/95 px-2.5 py-1.5">
+                      <Voice active={speaking} />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* the conversation floats off the photo, so the face stays clear */}
               <AnimatePresence mode="wait">
@@ -194,17 +243,22 @@ function Bubble({ className, children }: { className: string; children: ReactNod
   );
 }
 
+/** A finished call: kept as pixels, with its outcome. */
 function SideTile({
   who,
+  zoom,
   cols,
   h,
   tag,
+  dur,
   show,
 }: {
   who: { src: string; focus: { x: number; y: number } };
+  zoom: number;
   cols: number;
   h: number;
   tag: string;
+  dur: string;
   show: "md" | "xl";
 }) {
   return (
@@ -212,14 +266,26 @@ function SideTile({
       className={`relative hidden shrink-0 ${show === "md" ? "w-[17%] md:block" : "w-[14%] xl:block"}`}
       style={{ height: `${h * 100}%` }}
     >
-      <Pixel src={who.src} focus={who.focus} cols={cols} scan={false} className="absolute inset-0 overflow-hidden rounded-[12.6px]" />
-      <span className="t-label absolute inset-x-2 bottom-2 truncate rounded-[7.2px] bg-paper/95 px-2 py-1.5 text-ink-2">
-        <span className="mr-1.5 inline-block h-[6px] w-[6px] rounded-[1.8px] bg-lime-deep align-middle" aria-hidden />
-        {tag}
-      </span>
+      <Pixel
+        src={who.src}
+        focus={who.focus}
+        zoom={zoom}
+        cols={cols}
+        animate={false}
+        scan={false}
+        className="absolute inset-0 overflow-hidden rounded-[12.6px]"
+      />
+      <div className="absolute inset-x-2 bottom-2 rounded-[7.2px] bg-paper/95 px-2 py-1.5">
+        <div className="flex items-center gap-1.5 truncate text-[11.25px] font-[520] text-ink">
+          <Phone className="h-3 w-3 shrink-0 text-lime-deep" />
+          {tag}
+        </div>
+        <div className="t-label mt-0.5 truncate text-ink-3">{dur} · 6/6 checks</div>
+      </div>
     </div>
   );
 }
+
 
 /** A vertical dotted wire, centred, with voice pulses dropping down it. */
 function Drop({
@@ -424,9 +490,9 @@ function Flow({ t, loop, live }: { t: number; loop: number; live: (a: number) =>
 
 const fmt = (s: number) => `00:${String(Math.floor(s)).padStart(2, "0")}`;
 
-function Check() {
+function Check({ className = "h-4 w-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
       <path d="M3.5 8.4 6.6 11.4 12.5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

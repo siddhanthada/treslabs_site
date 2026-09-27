@@ -89,7 +89,8 @@ export function Scenarios() {
                   src={PEOPLE[s.person].src}
                   focus={PEOPLE[s.person].focus}
                   cols={30}
-                  build={1.2}
+                  zoom={1.4}
+                  animate={false}
                   scan={false}
                   gap={0.4}
                   className="h-[68.4px] w-[68.4px] shrink-0 overflow-hidden rounded-[9px]"

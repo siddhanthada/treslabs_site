@@ -4,19 +4,22 @@ import { useRef } from "react";
 import { motion, useInView } from "motion/react";
 import { Card, Section } from "@/components/site/Section";
 import { Pixel, PEOPLE } from "@/components/brand/Pixel";
+import { Phone } from "@/components/brand/Phone";
 import { ease } from "@/lib/motion";
 
 const SIDES = [
   {
-    who: PEOPLE.tuesday,
+    who: PEOPLE.ana,
     tag: "Tuesday · v14",
+    dur: "1:12",
     line: "“No — don’t worry. I’ll sort it out myself.”",
     note: "4.2 seconds of silence while the carrier timed out. The caller hung up.",
     bad: true,
   },
   {
-    who: PEOPLE.thursday,
+    who: PEOPLE.lena,
     tag: "Thursday · v15",
+    dur: "0:48",
     line: "“Oh — brilliant. Before six?”",
     note: "Answered from the warehouse feed in under a second. Delivered at 14:52.",
     bad: false,
@@ -47,16 +50,17 @@ export function Human() {
                   src={s.who.src}
                   focus={s.who.focus}
                   cols={84}
-                  build={2.2}
+                  animate={false}
                   className="aspect-[16/10] w-full overflow-hidden rounded-[10.8px]"
                   alt=""
                 />
                 <span
-                  className={`absolute left-3 top-3 rounded-[7.2px] px-2.5 py-1 text-[11.25px] ${
+                  className={`absolute left-3 top-3 flex items-center gap-1.5 rounded-[7.2px] px-2.5 py-1 text-[11.25px] ${
                     s.bad ? "bg-paper text-fault" : "bg-lime text-ink"
                   }`}
                 >
-                  {s.tag}
+                  <Phone className="h-3 w-3" />
+                  {s.tag} · {s.dur}
                 </span>
               </div>
               <div className="px-5 pb-5 pt-6">

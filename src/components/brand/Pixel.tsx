@@ -30,6 +30,8 @@ export function Pixel({
   gap = 1,
   build = 1.9,
   scan = true,
+  animate = true,
+  zoom = 1,
   className = "",
   alt = "",
 }: {
@@ -43,6 +45,10 @@ export function Pixel({
   /** Seconds to resolve. */
   build?: number;
   scan?: boolean;
+  /** false: appear already resolved (a quick fade) — the build is reserved for a live call. */
+  animate?: boolean;
+  /** Crop tighter than the frame's aspect around the focus point. */
+  zoom?: number;
   className?: string;
   alt?: string;
 }) {
@@ -90,6 +96,8 @@ export function Pixel({
       let sh = img.naturalHeight;
       if (sw / sh > aspect) sw = sh * aspect;
       else sh = sw / aspect;
+      sw /= zoom;
+      sh /= zoom;
       const sx = Math.min(img.naturalWidth - sw, Math.max(0, focus.x * img.naturalWidth - sw / 2));
       const sy = Math.min(img.naturalHeight - sh, Math.max(0, focus.y * img.naturalHeight - sh / 2));
 
@@ -162,7 +170,7 @@ export function Pixel({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
       const S = BLOCKS.length;
-      const p = reduce ? S : (elapsed / build) * S;
+      const p = reduce || !animate ? S : (elapsed / build) * S;
       const scanY = scan && !reduce && elapsed > build + 0.6 ? (((elapsed - build) % 5.5) / 1.6) * rows : -99;
       const g = Math.min(gap, cell * 0.2);
       for (let y = 0; y < rows; y++) {
@@ -188,6 +196,11 @@ export function Pixel({
       if (started || cancelled || !img.complete || !img.naturalWidth) return;
       started = true;
       prepare();
+      if (!animate) {
+        draw(0);
+        canvas.style.opacity = "1";
+        return;
+      }
       const t0 = performance.now();
       let last = 0;
       const loop = (now: number) => {
@@ -213,7 +226,9 @@ export function Pixel({
     img.onload = () => io.observe(el);
 
     const ro = new ResizeObserver(() => {
-      if (started) prepare();
+      if (!started) return;
+      prepare();
+      if (!animate) draw(0);
     });
     ro.observe(el);
 
@@ -223,11 +238,15 @@ export function Pixel({
       io.disconnect();
       ro.disconnect();
     };
-  }, [src, cols, focus.x, focus.y, gap, build, scan, reduce]);
+  }, [src, cols, focus.x, focus.y, gap, build, scan, reduce, animate, zoom]);
 
   return (
     <div ref={host} className={className} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true}>
-      <canvas ref={cv} className="block h-full w-full" />
+      <canvas
+        ref={cv}
+        className="block h-full w-full transition-opacity duration-500"
+        style={animate ? undefined : { opacity: 0 }}
+      />
     </div>
   );
 }
@@ -240,6 +259,10 @@ export const PEOPLE = {
   older: { src: "https://images.unsplash.com/photo-1788778055162-abfe0258c57e", focus: { x: 0.45, y: 0.3 } },
   street: { src: "https://images.unsplash.com/photo-1626063240213-c629ae4ef34c", focus: { x: 0.55, y: 0.45 } },
   walking: { src: "https://images.unsplash.com/photo-1707139051019-dee0b357f9dd", focus: { x: 0.5, y: 0.4 } },
-  desk: { src: "https://images.unsplash.com/photo-1605568985653-3d8e43f4efa6", focus: { x: 0.45, y: 0.35 } },
-  suit: { src: "https://images.unsplash.com/photo-1758525589111-eaba67028b36", focus: { x: 0.5, y: 0.3 } },
+  desk: { src: "https://images.unsplash.com/photo-1605568985653-3d8e43f4efa6", focus: { x: 0.5, y: 0.3 } },
+  suit: { src: "https://images.unsplash.com/photo-1758525589111-eaba67028b36", focus: { x: 0.5, y: 0.38 } },
+  rose: { src: "https://images.unsplash.com/photo-1734336037902-e8ffd46704cd", focus: { x: 0.6, y: 0.42 } },
+  mira: { src: "https://images.unsplash.com/photo-1698891667770-c611cf57d82c", focus: { x: 0.5, y: 0.4 } },
+  ana: { src: "https://images.unsplash.com/photo-1686723726446-8b881f37ce62", focus: { x: 0.52, y: 0.3 } },
+  lena: { src: "https://images.unsplash.com/photo-1758876201450-cf77ab8b95bc", focus: { x: 0.64, y: 0.38 } },
 } as const;
