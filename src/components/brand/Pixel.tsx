@@ -263,6 +263,9 @@ export const PEOPLE = {
   suit: { src: "https://images.unsplash.com/photo-1758525589111-eaba67028b36", focus: { x: 0.5, y: 0.38 } },
   rose: { src: "https://images.unsplash.com/photo-1734336037902-e8ffd46704cd", focus: { x: 0.6, y: 0.42 } },
   mira: { src: "https://images.unsplash.com/photo-1698891667770-c611cf57d82c", focus: { x: 0.5, y: 0.4 } },
+  arjun: { src: "https://images.unsplash.com/photo-1659353221337-c67b04ed7f8c", focus: { x: 0.37, y: 0.28 } },
+  priya: { src: "https://images.unsplash.com/photo-1733737272264-6af8f1aa41fc", focus: { x: 0.5, y: 0.32 } },
+  ramesh: { src: "https://images.unsplash.com/photo-1569140733895-eabccf089fc3", focus: { x: 0.58, y: 0.3 } },
   ana: { src: "https://images.unsplash.com/photo-1686723726446-8b881f37ce62", focus: { x: 0.52, y: 0.3 } },
   lena: { src: "https://images.unsplash.com/photo-1758876201450-cf77ab8b95bc", focus: { x: 0.64, y: 0.38 } },
 } as const;

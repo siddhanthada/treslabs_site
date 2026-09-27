@@ -12,53 +12,155 @@ import { Pixel, PEOPLE } from "@/components/brand/Pixel";
 import { ease } from "@/lib/motion";
 
 /*
-  Hero: people first. A row of callers, the middle one live. Its voice runs
-  down a dotted line out of the hero and into the call flow below, which
-  plays the same call on the same clock.
+  Hero: calls keep coming. The middle caller is live — a real photo, a real
+  conversation. Their voice drops down into the call flow below, which plays
+  the same call on the same clock. When the call ends it resolves into pixels
+  (the call as Treslabs keeps it), joins the finished calls, and the next
+  caller comes through.
+
+  Illustrative people (Unsplash), fictional calls for Harrow & Finch.
 */
 
-const LOOP = 16;
-/** The call ends here: the live photo resolves into pixels — the call as Treslabs keeps it. */
-const ENDS = 12.4;
+type Person = { src: string; focus: { x: number; y: number } };
+type Scene = {
+  who: Person;
+  lines: [caller: string, agent: string, reply: string];
+  systems: [string, string][];
+  outcome: [string, string];
+  tag: string;
+  dur: string;
+};
 
-/** The live call's conversation, on the loop clock. */
-const LINES = [
-  { at: 0.4, who: "caller", text: "My lamp was meant to come Monday." },
-  { at: 2, who: "agent", text: "It’s out for delivery — with you by six today." },
-  { at: 8.8, who: "caller", text: "Oh — brilliant. Thank you." },
+const SCENES: Scene[] = [
+  {
+    who: PEOPLE.arjun,
+    lines: ["My lamp was meant to come Monday.", "It’s out for delivery — with you by six today.", "Oh — brilliant. Thank you."],
+    systems: [
+      ["Customer record", "Caller verified"],
+      ["Orders", "#44812 · Arlo lamp"],
+      ["Warehouse", "Out for delivery"],
+      ["SMS", "Alert · 2 stops away"],
+    ],
+    outcome: ["Resolved", "Arrives today · no callback"],
+    tag: "Order resolved",
+    dur: "1:48",
+  },
+  {
+    who: PEOPLE.priya,
+    lines: ["I won’t be home on Friday for the delivery.", "No problem — Monday, 8 to 12 is free. Shall I book it?", "Monday’s perfect."],
+    systems: [
+      ["Customer record", "Caller verified"],
+      ["Orders", "#45102 · Hale sideboard"],
+      ["Bookings", "Mon 8–12 free"],
+      ["Email", "Confirmation sent"],
+    ],
+    outcome: ["Rebooked", "Mon 8–12 · confirmed"],
+    tag: "Rebooked · Mon",
+    dur: "2:10",
+  },
+  {
+    who: PEOPLE.suit,
+    lines: ["The lamp base arrived cracked.", "Sorry about that — I’ve sent an £84 refund to Sam to approve.", "Great, thanks."],
+    systems: [
+      ["Customer record", "Caller verified"],
+      ["Orders", "#44907 · Tove base · £84"],
+      ["Refund policy", "Over £50 → a person"],
+      ["Returns team", "Sent to Sam · photos"],
+    ],
+    outcome: ["Handed to Sam", "Refund approved · 4 min"],
+    tag: "Refund → Sam",
+    dur: "3:02",
+  },
+  {
+    who: PEOPLE.rose,
+    lines: ["I’ve moved — can you update my address?", "Done. Both open orders now go to 14 Park Road.", "Perfect, thank you."],
+    systems: [
+      ["Customer record", "Caller verified"],
+      ["Address check", "Postcode valid"],
+      ["Orders", "2 open orders updated"],
+      ["Email", "Confirmation sent"],
+    ],
+    outcome: ["Address updated", "2 orders rerouted"],
+    tag: "Address updated",
+    dur: "1:21",
+  },
+  {
+    who: PEOPLE.ramesh,
+    lines: ["Can I speak to a person, please?", "Of course — putting you through to Jess, with the details.", "Thank you."],
+    systems: [
+      ["Customer record", "Caller verified"],
+      ["Policy", "Asked for a person"],
+      ["Queue", "Jess · under 1 min"],
+      ["Handover", "Summary attached"],
+    ],
+    outcome: ["Handed to Jess", "No repeat questions"],
+    tag: "Handed to Jess",
+    dur: "0:52",
+  },
+];
+
+/** One call, in seconds. Every scene runs on the same clock. */
+const T = {
+  caller: 0.3,
+  drop: [0.4, 4.6], // the caller's voice leaves the hero
+  entry: [1.1, 5.3], // …and reaches Treslabs
+  think: [1.1, 1.6],
+  systems: [1.6, 1.9, 2.2, 3.6], // the last one is the follow-up action
+  agent: 2.4,
+  reply: 4.6,
+  outcome: 5.6,
+  evaluate: 6.2,
+  ends: 7.3, // the call resolves into pixels
+  loop: 9.4,
+};
+const DROP_DUR = 0.7;
+
+/** Side slots, outer → inner → inner → outer, showing the calls that came before. */
+const SLOTS = [
+  { back: 3, h: 0.66, show: "xl" },
+  { back: 1, h: 0.82, show: "md" },
+  { back: 2, h: 0.82, show: "md" },
+  { back: 4, h: 0.66, show: "xl" },
 ] as const;
 
-/** Calls already handled — kept as Treslabs sees them. Illustrative people, fictional calls. */
-const SIDE = [
-  { who: PEOPLE.mira, zoom: 1.5, cols: 24, h: 0.66, tag: "Refund → Sam", dur: "3:02", show: "xl" },
-  { who: PEOPLE.suit, zoom: 1.7, cols: 28, h: 0.82, tag: "Order resolved", dur: "1:48", show: "md" },
-  { who: PEOPLE.rose, zoom: 1.2, cols: 28, h: 0.82, tag: "Rebooked · Mon", dur: "2:10", show: "md" },
-  { who: PEOPLE.desk, zoom: 1.5, cols: 24, h: 0.66, tag: "Handed to Jess", dur: "0:52", show: "xl" },
-] as const;
+const pixelUrl = (src: string) => `${src}?w=640&q=75&auto=format`;
 
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.1 });
   const reduce = useReducedMotion();
-  const [t, setT] = useState(reduce ? LOOP - 1.5 : 0);
+  const [t, setT] = useState(reduce ? T.evaluate + 1 : 0);
   const [loop, setLoop] = useState(0);
 
   useEffect(() => {
     if (!inView || reduce) return;
-    const start = performance.now();
+    // resume from where it paused, so a scene never restarts mid-way
+    const start = performance.now() - (loop * T.loop + t) * 1000;
     const id = window.setInterval(() => {
       const s = (performance.now() - start) / 1000;
-      setT(s % LOOP);
-      setLoop(Math.floor(s / LOOP));
-    }, 80);
+      setT(s % T.loop);
+      setLoop(Math.floor(s / T.loop));
+    }, 60);
     return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, reduce]);
 
-  const live = (a: number) => t >= a && t < LOOP - 0.5;
-  const speaking = (t > 0.4 && t < 3.2) || (t > 8.8 && t < 10);
-  const ended = t >= ENDS;
-  const caller = [...LINES].reverse().find((l) => l.who === "caller" && t >= l.at && !ended);
-  const agent = LINES.find((l) => l.who === "agent" && t >= l.at && !ended);
+  // warm the cache so every caller's pixels are ready when their call ends
+  useEffect(() => {
+    SCENES.forEach(({ who }) => {
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      img.src = pixelUrl(who.src);
+    });
+  }, []);
+
+  const n = SCENES.length;
+  const idx = loop % n;
+  const scene = SCENES[idx];
+  const ended = t >= T.ends;
+  const speaking = (t > T.caller && t < 1.5) || (t > T.agent && t < 3.5) || (t > T.reply && t < 5.4);
+  const caller = !ended && t >= T.caller ? (t >= T.reply ? scene.lines[2] : scene.lines[0]) : null;
+  const agent = !ended && t >= T.agent ? scene.lines[1] : null;
 
   return (
     <div ref={ref}>
@@ -110,21 +212,35 @@ export function Hero() {
             className="flex items-center justify-center gap-3"
             style={{ height: "clamp(240px, calc(100svh - 530px), 380px)" }}
           >
-            {SIDE.slice(0, 2).map((s) => (
-              <SideTile key={s.tag} {...s} />
+            {SLOTS.slice(0, 2).map((s) => (
+              <SideTile key={s.back} slot={s} scene={SCENES[(idx - s.back + n * 10) % n]} />
             ))}
+
             <div className="relative z-10 h-full w-full max-w-[340px] shrink-0 md:w-[27%]">
               {/* live: a real person on a real call; when it ends it becomes pixels — the call as data */}
               <div className="absolute inset-0 overflow-hidden rounded-[14.4px] bg-sink ring-1 ring-ink/10">
-                <Image
-                  src={`${PEOPLE.hero.src}?w=900&q=80&auto=format`}
-                  alt="An illustrative caller on the phone"
-                  fill
-                  priority
-                  sizes="(min-width: 768px) 340px, 90vw"
-                  className="object-cover"
-                  style={{ objectPosition: `${PEOPLE.hero.focus.x * 100}% ${PEOPLE.hero.focus.y * 100}%` }}
-                />
+                {SCENES.map((s, i) => (
+                  <motion.div
+                    key={s.who.src}
+                    className="absolute inset-0"
+                    initial={false}
+                    animate={{ opacity: i === idx ? 1 : 0 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Image
+                      src={`${s.who.src}?w=900&q=80&auto=format`}
+                      alt={i === idx ? "An illustrative caller on the phone" : ""}
+                      fill
+                      priority={i === 0}
+                      sizes="(min-width: 768px) 340px, 90vw"
+                      className="scale-[1.3] object-cover"
+                      style={{
+                        objectPosition: `${s.who.focus.x * 100}% ${s.who.focus.y * 100}%`,
+                        transformOrigin: `${s.who.focus.x * 100}% ${s.who.focus.y * 100}%`,
+                      }}
+                    />
+                  </motion.div>
+                ))}
                 <AnimatePresence>
                   {ended && (
                     <motion.div
@@ -133,7 +249,7 @@ export function Hero() {
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.6 }}
                     >
-                      <Pixel src={PEOPLE.hero.src} focus={PEOPLE.hero.focus} cols={44} build={1.1} scan={false} className="absolute inset-0" />
+                      <Pixel src={scene.who.src} focus={scene.who.focus} zoom={1.3} cols={44} build={1} scan={false} className="absolute inset-0" />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -147,7 +263,7 @@ export function Hero() {
                   }`}
                 >
                   <Phone className="h-3 w-3" />
-                  {ended ? `Ended · ${fmt(ENDS)}` : `Live · ${fmt(t)}`}
+                  {ended ? `Ended · ${scene.dur}` : `Live · ${fmt(t)}`}
                 </span>
                 <span className="flex items-center gap-1.5 rounded-[7.2px] bg-paper/95 px-2.5 py-1 text-[11.25px] font-[500] text-ink">
                   {ended ? (
@@ -167,7 +283,13 @@ export function Hero() {
               </div>
               <AnimatePresence>
                 {!ended && (
-                  <motion.div exit={{ opacity: 0 }} className="absolute inset-x-0 bottom-3 flex justify-center">
+                  <motion.div
+                    key={`voice-${loop}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-x-0 bottom-3 flex justify-center"
+                  >
                     <div className="rounded-[8px] bg-paper/95 px-2.5 py-1.5">
                       <Voice active={speaking} />
                     </div>
@@ -178,8 +300,8 @@ export function Hero() {
               {/* the conversation floats off the photo, so the face stays clear */}
               <AnimatePresence mode="wait">
                 {caller && (
-                  <Bubble key={`${caller.at}-${loop}`} className="left-3 top-[30%] md:left-[-14%] max-w-[240px] bg-paper text-ink">
-                    <span className="speech-caller text-[15.3px] leading-tight">“{caller.text}”</span>
+                  <Bubble key={`${caller}-${loop}`} className="left-3 top-[30%] md:left-[-14%] max-w-[240px] bg-paper text-ink">
+                    <span className="speech-caller text-[15.3px] leading-tight">“{caller}”</span>
                   </Bubble>
                 )}
               </AnimatePresence>
@@ -188,23 +310,24 @@ export function Hero() {
                   <Bubble key={`agent-${loop}`} className="right-3 top-[52%] md:right-[-16%] max-w-[250px] bg-ink text-on-carbon">
                     <span className="flex items-start gap-2 text-[12.6px] leading-snug">
                       <Mark centered className="mt-[2px] h-3.5 w-3.5 shrink-0 text-lime" trail={false} title="" />
-                      {agent.text}
+                      {agent}
                     </span>
                   </Bubble>
                 )}
               </AnimatePresence>
             </div>
-            {SIDE.slice(2).map((s) => (
-              <SideTile key={s.tag} {...s} />
+
+            {SLOTS.slice(2).map((s) => (
+              <SideTile key={s.back} slot={s} scene={SCENES[(idx - s.back + n * 10) % n]} />
             ))}
           </div>
         </motion.div>
 
         {/* the signal leaves the hero */}
-        <Drop className="min-h-12 flex-1" on={t > 0.4} pulses={[1.2, 8.9]} t={t} loop={loop} dur={1.1} />
+        <Drop className="min-h-12 flex-1" on={t > T.caller && !ended} pulses={T.drop} t={t} loop={loop} dur={DROP_DUR} />
       </section>
 
-      <Flow t={t} loop={loop} live={live} />
+      <Flow t={t} loop={loop} scene={scene} />
     </div>
   );
 }
@@ -243,49 +366,43 @@ function Bubble({ className, children }: { className: string; children: ReactNod
   );
 }
 
-/** A finished call: kept as pixels, with its outcome. */
-function SideTile({
-  who,
-  zoom,
-  cols,
-  h,
-  tag,
-  dur,
-  show,
-}: {
-  who: { src: string; focus: { x: number; y: number } };
-  zoom: number;
-  cols: number;
-  h: number;
-  tag: string;
-  dur: string;
-  show: "md" | "xl";
-}) {
+/** A finished call: kept as pixels, with its outcome. Crossfades as the calls move along. */
+function SideTile({ slot, scene }: { slot: (typeof SLOTS)[number]; scene: Scene }) {
   return (
     <div
-      className={`relative hidden shrink-0 ${show === "md" ? "w-[17%] md:block" : "w-[14%] xl:block"}`}
-      style={{ height: `${h * 100}%` }}
+      className={`relative hidden shrink-0 overflow-hidden rounded-[12.6px] bg-sink ${slot.show === "md" ? "w-[17%] md:block" : "w-[14%] xl:block"}`}
+      style={{ height: `${slot.h * 100}%` }}
     >
-      <Pixel
-        src={who.src}
-        focus={who.focus}
-        zoom={zoom}
-        cols={cols}
-        animate={false}
-        scan={false}
-        className="absolute inset-0 overflow-hidden rounded-[12.6px]"
-      />
-      <div className="absolute inset-x-2 bottom-2 rounded-[7.2px] bg-paper/95 px-2 py-1.5">
-        <div className="flex items-center gap-1.5 truncate text-[11.25px] font-[520] text-ink">
-          <Phone className="h-3 w-3 shrink-0 text-lime-deep" />
-          {tag}
-        </div>
-        <div className="t-label mt-0.5 truncate text-ink-3">{dur} · 6/6 checks</div>
-      </div>
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={scene.who.src}
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Pixel
+            src={scene.who.src}
+            focus={scene.who.focus}
+            zoom={1.4}
+            cols={slot.show === "md" ? 28 : 24}
+            animate={false}
+            scan={false}
+            className="absolute inset-0"
+          />
+          <div className="absolute inset-x-2 bottom-2 rounded-[7.2px] bg-paper/95 px-2 py-1.5">
+            <div className="flex items-center gap-1.5 truncate text-[11.25px] font-[520] text-ink">
+              <Phone className="h-3 w-3 shrink-0 text-lime-deep" />
+              {scene.tag}
+            </div>
+            <div className="t-label mt-0.5 truncate text-ink-3">{scene.dur} · 6/6 checks</div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
-
 
 /** A vertical dotted wire, centred, with voice pulses dropping down it. */
 function Drop({
@@ -344,15 +461,11 @@ type Pt = [number, number];
 
 const CORE = { x: 480, y: 90, s: 140 };
 const MID = CORE.y + CORE.s / 2;
-const SYSTEMS = [
-  { k: "Customer record", v: "Caller verified", y: 18, at: 4.2 },
-  { k: "Orders", v: "#44812 · Arlo lamp", y: 88, at: 5.2 },
-  { k: "Warehouse", v: "Out for delivery", y: 158, at: 6.4 },
-  { k: "SMS", v: "Alert · 2 stops away", y: 228, at: 9.4 },
-];
+const SYS_Y = [18, 88, 158, 228];
 const SYS = { x: 20, w: 230, h: 60 };
 const OUT = { x: 670, y: MID - 55, w: 190, h: 110 };
 const EVAL = { x: 890, y: MID - 55, w: 190, h: 110 };
+const SPEED = 900; // plan units per second for pulses
 
 const ENTRY: Pt[] = [
   [W / 2, 0],
@@ -373,8 +486,11 @@ const TO_EVAL: Pt[] = [
   [EVAL.x, MID],
 ];
 
-function Flow({ t, loop, live }: { t: number; loop: number; live: (a: number) => boolean }) {
-  const thinking = t > 2.4 && t < 4.2;
+function Flow({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
+  const on = (a: number) => t >= a;
+  const thinking = t > T.think[0] && t < T.think[1];
+  const state = thinking ? "working…" : t >= T.systems[0] && t < T.outcome ? "acting" : t >= T.outcome ? "done" : "listening";
+  const window_ = (a: number, d = 0.8) => t >= a && t < a + d;
   return (
     <section aria-label="How one call flows through Treslabs" className="pb-[clamp(32px,5vw,72px)]">
       <div className="wrap">
@@ -383,41 +499,40 @@ function Flow({ t, loop, live }: { t: number; loop: number; live: (a: number) =>
           className="relative mx-auto hidden w-full max-w-[1100px] md:block"
           style={{ aspectRatio: `${W} / ${H}` }}
           role="img"
-          aria-label="The caller's voice reaches Treslabs, which checks your systems, resolves the call, and scores it."
+          aria-label="The caller's voice reaches Treslabs, which works in your systems, resolves the call, and scores it."
         >
           <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
-            <Wire pts={ENTRY} on={t > 0.4} warm />
-            {SYSTEMS.map((s) => (
-              <Wire key={s.k} pts={toSystem(s.y)} on={live(s.at)} />
+            <Wire pts={ENTRY} on={t > T.caller && t < T.ends} warm />
+            {SYS_Y.map((y, i) => (
+              <Wire key={i} pts={toSystem(y)} on={on(T.systems[i])} />
             ))}
-            <Wire pts={TO_OUT} on={live(10.8)} />
-            <Wire pts={TO_EVAL} on={live(11.8)} />
+            <Wire pts={TO_OUT} on={on(T.outcome)} />
+            <Wire pts={TO_EVAL} on={on(T.evaluate)} />
 
-            {live(2.3) && t < 3 && <Pulse key={`e1-${loop}`} pts={ENTRY} warm />}
-            {live(10.0) && t < 10.8 && <Pulse key={`e2-${loop}`} pts={ENTRY} warm />}
-            {SYSTEMS.map((s) => live(s.at) && t < s.at + 1.5 && <Pulse key={`${s.k}-${loop}`} pts={toSystem(s.y)} />)}
-            {live(10.8) && t < 11.6 && <Pulse key={`o-${loop}`} pts={TO_OUT} />}
-            {live(11.8) && t < 12.6 && <Pulse key={`v-${loop}`} pts={TO_EVAL} />}
+            {T.entry.map((a) => window_(a) && <Pulse key={`e${a}-${loop}`} pts={ENTRY} warm />)}
+            {SYS_Y.map((y, i) => window_(T.systems[i], 1) && <Pulse key={`s${i}-${loop}`} pts={toSystem(y)} />)}
+            {window_(T.outcome) && <Pulse key={`o-${loop}`} pts={TO_OUT} />}
+            {window_(T.evaluate) && <Pulse key={`v-${loop}`} pts={TO_EVAL} />}
           </svg>
 
-          {SYSTEMS.map((s) => {
-            const on = live(s.at + 0.5);
+          {scene.systems.map(([k, v], i) => {
+            const lit = on(T.systems[i] + 0.35);
             return (
-              <Box key={s.k} x={SYS.x} y={s.y} w={SYS.w} h={SYS.h}>
+              <Box key={i} x={SYS.x} y={SYS_Y[i]} w={SYS.w} h={SYS.h}>
                 <span
                   className={`absolute -right-[3.6px] top-1/2 h-[7.2px] w-[7.2px] -translate-y-1/2 rounded-[2.7px] transition-colors duration-300 ${
-                    on ? "bg-lime-deep" : "bg-line-2"
+                    lit ? "bg-lime-deep" : "bg-line-2"
                   }`}
                 />
                 <div className="flex h-full flex-col justify-center px-4">
-                  <div className="text-[12.15px] font-[540]">{s.k}</div>
+                  <div className="text-[12.15px] font-[540]">{k}</div>
                   <motion.div
                     initial={false}
-                    animate={{ opacity: on ? 1 : 0, y: on ? 0 : 3 }}
-                    transition={{ duration: 0.4 }}
+                    animate={{ opacity: lit ? 1 : 0, y: lit ? 0 : 3 }}
+                    transition={{ duration: 0.3 }}
                     className="t-label mt-1 truncate text-ink-2"
                   >
-                    {s.v}
+                    {v}
                   </motion.div>
                 </div>
               </Box>
@@ -428,23 +543,21 @@ function Flow({ t, loop, live }: { t: number; loop: number; live: (a: number) =>
             <div className="absolute inset-0 grid place-items-center">
               <Mark centered spinning={thinking} maxSpeed={11} className="h-[44%] w-[44%] text-ink" trail={false} title="" />
             </div>
-            <div className="t-label absolute inset-x-0 bottom-2.5 text-center text-ink-3">
-              {thinking ? "working…" : t > 4.2 && t < 12.5 ? "acting" : "listening"}
-            </div>
+            <div className="t-label absolute inset-x-0 bottom-2.5 text-center text-ink-3">{state}</div>
           </Box>
 
           <Box x={OUT.x} y={OUT.y} w={OUT.w} h={OUT.h} label="outcome">
             <div className="flex h-full items-center gap-3.5 px-4 pt-4">
               <span
-                className={`grid h-9 w-9 shrink-0 place-items-center rounded-[9px] transition-colors duration-500 ${
-                  live(11.2) ? "bg-lime text-ink" : "bg-sink text-ink-3"
+                className={`grid h-9 w-9 shrink-0 place-items-center rounded-[9px] transition-colors duration-300 ${
+                  on(T.outcome + 0.3) ? "bg-lime text-ink" : "bg-sink text-ink-3"
                 }`}
               >
                 <Check />
               </span>
-              <motion.div initial={false} animate={{ opacity: live(11.2) ? 1 : 0.35 }} transition={{ duration: 0.5 }}>
-                <div className="text-[13.05px] font-[540]">{live(11.2) ? "Delivered" : "Waiting…"}</div>
-                <div className="t-label mt-1 text-ink-2">Thu 14:52 · no callback</div>
+              <motion.div initial={false} animate={{ opacity: on(T.outcome + 0.3) ? 1 : 0.35 }} transition={{ duration: 0.3 }} className="min-w-0">
+                <div className="truncate text-[13.05px] font-[540]">{on(T.outcome + 0.3) ? scene.outcome[0] : "Waiting…"}</div>
+                <div className="t-label mt-1 text-ink-2">{on(T.outcome + 0.3) ? scene.outcome[1] : "—"}</div>
               </motion.div>
             </div>
           </Box>
@@ -455,13 +568,13 @@ function Flow({ t, loop, live }: { t: number; loop: number; live: (a: number) =>
                 {Array.from({ length: 6 }, (_, i) => (
                   <span
                     key={i}
-                    className={`h-[14.4px] flex-1 rounded-[3.6px] border transition-colors duration-300 ${
-                      live(12.2 + i * 0.12) ? "border-lime-deep/50 bg-lime" : "border-line-2"
+                    className={`h-[14.4px] flex-1 rounded-[3.6px] border transition-colors duration-200 ${
+                      on(T.evaluate + 0.3 + i * 0.09) ? "border-lime-deep/50 bg-lime" : "border-line-2"
                     }`}
                   />
                 ))}
               </div>
-              <div className="t-label mt-2.5 text-ink-2">{live(12.2) ? "6 of 6 checks" : "waiting…"}</div>
+              <div className="t-label mt-2.5 text-ink-2">{on(T.evaluate + 0.3) ? "6 of 6 checks" : "waiting…"}</div>
             </div>
           </Box>
         </div>
@@ -469,17 +582,17 @@ function Flow({ t, loop, live }: { t: number; loop: number; live: (a: number) =>
         {/* mobile: the same steps, stacked */}
         <ol className="mx-auto grid max-w-sm gap-2 md:hidden">
           {[
-            { k: "Treslabs", v: t > 4.2 && t < 12.5 ? "acting" : "listening", on: t > 2.4 },
-            ...SYSTEMS.map((s) => ({ k: s.k, v: s.v, on: live(s.at + 0.5) })),
-            { k: "Outcome", v: "Delivered · no callback", on: live(11.2) },
-            { k: "Evaluation", v: "6 of 6 checks", on: live(12.2) },
-          ].map((s) => (
-            <li key={s.k} className="flex items-center justify-between rounded-[12.6px] border border-line bg-paper px-4 py-3">
+            { k: "Treslabs", v: state, on: t > T.think[0] },
+            ...scene.systems.map(([k, v], i) => ({ k, v, on: on(T.systems[i] + 0.35) })),
+            { k: "Outcome", v: scene.outcome[0], on: on(T.outcome + 0.3) },
+            { k: "Evaluation", v: "6 of 6 checks", on: on(T.evaluate + 0.3) },
+          ].map((s, i) => (
+            <li key={i} className="flex items-center justify-between gap-3 rounded-[12.6px] border border-line bg-paper px-4 py-3">
               <span className="flex items-center gap-2.5 text-[13.05px] font-[540]">
                 <span className={`h-[7.2px] w-[7.2px] rounded-[2.7px] transition-colors ${s.on ? "bg-lime-deep" : "bg-line-2"}`} />
                 {s.k}
               </span>
-              <span className={`t-label text-ink-2 transition-opacity ${s.on ? "opacity-100" : "opacity-30"}`}>{s.v}</span>
+              <span className={`t-label truncate text-ink-2 transition-opacity ${s.on ? "opacity-100" : "opacity-30"}`}>{s.v}</span>
             </li>
           ))}
         </ol>
@@ -561,7 +674,7 @@ function Pulse({ pts, warm }: { pts: Pt[]; warm?: boolean }) {
         y: pts.map((p) => p[1] - 3.5),
         opacity: pts.map((_, i) => (i === pts.length - 1 ? 0 : 1)),
       }}
-      transition={{ duration: 0.3 + total / 420, times, ease: "linear" }}
+      transition={{ duration: 0.2 + total / SPEED, times, ease: "linear" }}
     />
   );
 }
