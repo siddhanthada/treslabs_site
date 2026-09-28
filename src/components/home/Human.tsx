@@ -16,6 +16,7 @@ const SIDES = [
     line: "“No — don’t worry. I’ll sort it out myself.”",
     note: "4.2 seconds of silence while the carrier timed out. The caller hung up.",
     bad: true,
+    checks: "3 of 6 checks",
   },
   {
     who: PEOPLE.nina,
@@ -25,6 +26,7 @@ const SIDES = [
     line: "“Oh — brilliant. Before six?”",
     note: "Answered from the warehouse feed in under a second. Delivered at 14:52.",
     bad: false,
+    checks: "6 of 6 checks",
   },
 ];
 
@@ -53,7 +55,8 @@ export function Human() {
                   focus={s.who.focus}
                   cols={84}
                   zoom={s.zoom}
-                  animate={false}
+                  build={1.6}
+                  scan={false}
                   className="aspect-[16/10] w-full overflow-hidden rounded-[10.8px]"
                   alt=""
                 />
@@ -65,6 +68,32 @@ export function Human() {
                   <Phone className="h-3 w-3" />
                   {s.tag} · {s.dur}
                 </span>
+                {/* the build is the call being evaluated; the verdict lands when it resolves */}
+                <motion.span
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={on ? { opacity: 1, y: 0 } : undefined}
+                  transition={{ duration: 0.4, ease: ease.out, delay: 1.9 + i * 0.15 }}
+                  className={`absolute right-3 top-3 flex items-center gap-1.5 rounded-[7.2px] px-2.5 py-1 text-[11.25px] ${
+                    s.bad ? "bg-paper text-[#a8411f]" : "bg-paper text-ink"
+                  }`}
+                >
+                  <span
+                    className={`grid h-3.5 w-3.5 place-items-center rounded-[3px] ${
+                      s.bad ? "bg-fault-tint text-[#a8411f]" : "bg-lime text-ink"
+                    }`}
+                  >
+                    {s.bad ? (
+                      <svg viewBox="0 0 16 16" className="h-2.5 w-2.5" aria-hidden>
+                        <path d="M5 5l6 6M11 5l-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 16 16" className="h-2.5 w-2.5" aria-hidden>
+                        <path d="M3.5 8.4 6.6 11.4 12.5 5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </span>
+                  Evaluated · {s.checks}
+                </motion.span>
               </div>
               <div className="px-5 pb-5 pt-6">
                 <p className="speech-caller text-[27px] leading-[1.12]">{s.line}</p>
