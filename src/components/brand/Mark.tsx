@@ -99,7 +99,7 @@ type MarkProps = {
   intro?: boolean;
   className?: string;
   title?: string;
-  /** Leave a signal-coloured trail while spinning. */
+  /** Leave an olive-lime trail while spinning. */
   trail?: boolean;
   /** Square box centred on the rotation point — for placing the mark in the middle of something. */
   centered?: boolean;
@@ -140,7 +140,7 @@ export function Mark({
     const paint = () => {
       const deg = (S.theta * 180) / Math.PI;
       paths.current.forEach((p, i) => p?.setAttribute("transform", bladeTransform(deg, i, S.s)));
-      // Trail: the arc swept in the last frames, in signal. Fades with speed.
+      // Trail: the arc swept in the last frames, in olive-lime. Fades with speed.
       const speed = Math.min(1, Math.abs(S.omega) / wmax.current);
       ghosts.current.forEach((g, j) => {
         if (!g) return;
@@ -276,7 +276,7 @@ export function Mark({
               ghosts.current[j] = el;
             }}
             opacity={0}
-            fill="var(--mark-trail, var(--color-signal))"
+            fill="var(--mark-trail, #9bbd28)"
           >
             {[0, 1, 2].map((i) => (
               <path key={i} d={BLADE_PATH} transform={bladeTransform(0, i, 1)} />

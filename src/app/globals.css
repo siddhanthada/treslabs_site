@@ -55,7 +55,7 @@
 }
 
 :root {
-  --mark-trail: var(--color-signal);
+  --mark-trail: #9bbd28; /* olive-lime; was signal blue */
   /* Dawn: only where the system's work becomes something in the world. */
   --dawn: linear-gradient(90deg, #3a3af0 0%, #8f62d9 38%, #de8a86 68%, #f1b862 100%);
   --gutter: clamp(18px, 3.6vw, 50.4px);
@@ -100,9 +100,9 @@ body {
   border-radius: 3.6px;
 }
 
-/* On dark ground the mark's trail uses the lit signal. */
+/* On dark ground the mark's trail is lime. */
 .bg-carbon {
-  --mark-trail: var(--color-signal-lit);
+  --mark-trail: var(--color-lime); /* was signal-lit blue */
 }
 
 @layer components {
