@@ -15,7 +15,8 @@ export const navLinks = [
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(true);
+  // The page opens on the light hero, so start light (starting dark flashed black on load).
+  const [dark, setDark] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
