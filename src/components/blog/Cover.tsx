@@ -16,6 +16,9 @@ export function Cover({
   sizes = "(min-width: 1024px) 60vw, 100vw",
   priority,
   cols = 56,
+  focus = { x: 0.5, y: 0.5 },
+  zoom = 1,
+  delay = 0,
 }: {
   src: string;
   alt: string;
@@ -23,6 +26,12 @@ export function Cover({
   sizes?: string;
   priority?: boolean;
   cols?: number;
+  /** Where to crop from, 0–1. Pixels and photo share it so the handoff doesn't jump. */
+  focus?: { x: number; y: number };
+  /** Crop tighter around the focus point. */
+  zoom?: number;
+  /** Extra ms before resolving, to stagger a row. */
+  delay?: number;
   /** Kept for call-site compatibility; unused. */
   edge?: number;
 }) {
@@ -33,9 +42,9 @@ export function Cover({
 
   useEffect(() => {
     if (!seen || reduce) return;
-    const id = window.setTimeout(() => setResolved(true), 1500);
+    const id = window.setTimeout(() => setResolved(true), 1500 + delay);
     return () => window.clearTimeout(id);
-  }, [seen, reduce]);
+  }, [seen, reduce, delay]);
 
   const photo = reduce || resolved;
 
@@ -48,10 +57,15 @@ export function Cover({
         priority={priority}
         sizes={sizes}
         className={`object-cover transition-opacity duration-700 ${photo ? "opacity-100" : "opacity-0"}`}
+        style={{
+          objectPosition: `${focus.x * 100}% ${focus.y * 100}%`,
+          transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+          transformOrigin: `${focus.x * 100}% ${focus.y * 100}%`,
+        }}
       />
       {!reduce && (
         <div className={`absolute inset-0 transition-opacity duration-700 ${photo ? "opacity-0" : "opacity-100"}`} aria-hidden>
-          <Pixel src={src} focus={{ x: 0.5, y: 0.5 }} cols={cols} build={1.1} scan={false} className="absolute inset-0" />
+          <Pixel src={src} focus={focus} zoom={zoom} cols={cols} build={1.1} scan={false} className="absolute inset-0" />
         </div>
       )}
     </div>
