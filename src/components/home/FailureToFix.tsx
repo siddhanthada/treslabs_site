@@ -5,7 +5,8 @@ import { motion, useInView, useReducedMotion } from "motion/react";
 import { Card, Section } from "@/components/site/Section";
 import { Mark } from "@/components/brand/Mark";
 import { ease } from "@/lib/motion";
-import { BeforeAfter } from "./Human";
+import { Moment } from "./Human";
+import { Stage } from "@/components/site/Stage";
 
 const STEP_MS = 1100;
 
@@ -42,10 +43,17 @@ export function FailureToFix() {
       id="improve"
       eyebrow="Improvement you can audit"
       title="One call fails. Here’s what happens next."
-      sub="The carrier’s system was slow, and the agent gave up. Treslabs turned that into a tested fix — and here’s what the caller heard next time."
-      align="split"
+      sub="A slow carrier system made the agent give up. Here’s how that one call became a tested fix — and what the next caller heard."
+      align="left"
     >
-      <div ref={ref} className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+      <Stage tone="sand">
+      <div className="px-4 py-8 sm:px-8 md:py-12 lg:px-12">
+      {/* Tuesday: the call that went wrong */}
+      <div className="flex">
+        <Moment side="before" />
+      </div>
+      <Connector />
+      <div ref={ref} className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
         {steps.map((s, i) => {
           const on = i < shown;
           return (
@@ -68,17 +76,25 @@ export function FailureToFix() {
         })}
       </div>
 
-      {/* the payoff: the same question, before and after the approved change */}
-      <div className="mt-16 md:mt-20">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <h3 className="max-w-[22ch] text-[clamp(22px,2.4vw,32px)] font-[540] leading-[1.1] tracking-[-0.028em]">
-            Behind every call is someone waiting for an answer.
-          </h3>
-          <p className="max-w-[22rem] text-[14.4px] leading-[1.5] text-ink-2">The same question, before and after one approved change.</p>
-        </div>
-        <BeforeAfter />
+      <Connector />
+      {/* Thursday: the same question, after the approved change */}
+      <div className="flex justify-end">
+        <Moment side="after" />
       </div>
+      </div>
+      </Stage>
     </Section>
+  );
+}
+
+/** A thin vertical thread between the moments of the story. */
+function Connector() {
+  return (
+    <div className="flex justify-center py-5" aria-hidden>
+      <svg width="2" height="44" className="overflow-visible">
+        <line x1="1" x2="1" y1="0" y2="44" stroke="#56720a" strokeOpacity=".45" strokeDasharray="3 5" className="wire-flow" />
+      </svg>
+    </div>
   );
 }
 

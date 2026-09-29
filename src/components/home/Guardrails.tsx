@@ -35,31 +35,44 @@ export function Guardrails() {
       eyebrow="Goals and guardrails"
       title="Tell it what to achieve. And where to stop."
       sub="No flowcharts. A goal, the actions it may take, and the lines it won’t cross."
-      align="split"
-      aside={
-        <div className="inline-flex rounded-[12px] border border-line bg-paper p-1" role="tablist" aria-label="Industries">
-            {industries.map((x, j) => (
-              <button
-                key={x.key}
-                role="tab"
-                aria-selected={i === j}
-                onClick={() => {
-                  setI(j);
-                  setAuto(false);
-                }}
-                className={`relative rounded-[9px] px-3.5 py-1.5 text-[12.6px] transition-colors sm:px-4 ${i === j ? "text-ink" : "text-ink-3 hover:text-ink"}`}
-              >
-                {i === j && (
-                  <motion.span layoutId="ind-pill" className="absolute inset-0 rounded-[9px] bg-sink" transition={{ type: "spring", stiffness: 420, damping: 36 }} />
-                )}
-                <span className="relative">{x.name}</span>
-              </button>
-            ))}
-          </div>
-      }
+      align="left"
     >
       <div ref={ref}>
         <Stage tone="lime">
+          {/* industries: feature tabs with a progress line, so it's clear they're clickable and that they move on */}
+          <div className="flex gap-6 overflow-x-auto border-b border-lime-deep/15 px-5 pt-5 sm:gap-9 sm:px-10 lg:px-14" role="tablist" aria-label="Industries">
+            {industries.map((x, j) => {
+              const on = i === j;
+              return (
+                <button
+                  key={x.key}
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => {
+                    setI(j);
+                    setAuto(false);
+                  }}
+                  className={`relative shrink-0 pb-4 text-[15.3px] tracking-[-0.01em] transition-colors ${on ? "text-ink" : "text-ink-3 hover:text-ink"}`}
+                >
+                  {x.name}
+                  <span className="absolute inset-x-0 -bottom-px h-[2px] overflow-hidden rounded-full">
+                    {on &&
+                      (auto && !reduce ? (
+                        <motion.span
+                          key={`${x.key}-${inView}`}
+                          className="block h-full origin-left bg-ink"
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: inView ? 1 : 0 }}
+                          transition={{ duration: ROTATE_MS / 1000, ease: "linear" }}
+                        />
+                      ) : (
+                        <motion.span layoutId="ind-line" className="block h-full bg-ink" />
+                      ))}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={ind.key}
@@ -156,17 +169,6 @@ export function Guardrails() {
             </motion.div>
           </AnimatePresence>
 
-          {auto && !reduce && (
-            <div className="absolute inset-x-0 bottom-0 h-[3px] bg-lime-deep/10">
-              <motion.div
-                key={`${ind.key}-${inView}`}
-                className="h-full origin-left bg-lime-deep/50"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: inView ? 1 : 0 }}
-                transition={{ duration: ROTATE_MS / 1000, ease: "linear" }}
-              />
-            </div>
-          )}
         </Stage>
       </div>
     </Section>

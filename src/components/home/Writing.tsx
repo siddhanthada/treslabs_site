@@ -13,7 +13,7 @@ export function Writing() {
       eyebrow="Writing"
       title="What we believe, written down."
       sub="The thinking behind Treslabs — and what we learn from every test call."
-      align="split"
+      align="left"
     >
       <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
         {three.map((p) => (

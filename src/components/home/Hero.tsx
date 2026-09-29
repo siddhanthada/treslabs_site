@@ -533,129 +533,84 @@ const span = (a: number, b: number) => `${((Math.min(b, DOM) - a) / DOM) * 100}%
 function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
   const head = Math.min(t, DOM);
   const working = t > T.think[0] && t < T.outcome;
-  const state = t < T.think[0] ? "Listening" : t < T.outcome ? "Working" : t < T.ends ? "Resolved" : "Evaluated";
-  const lanes: { k: string; bars: { a: number; b: number; tone: "caller" | "agent" | "system" | "outcome"; label?: string }[] }[] = [
-    {
-      k: "Caller",
-      bars: [
-        { a: T.caller, b: 2.1, tone: "caller" },
-        { a: T.reply, b: 6, tone: "caller" },
-      ],
-    },
-    { k: "Agent", bars: [{ a: T.agent, b: 4.1, tone: "agent" }] },
-    ...scene.systems.map(([k, v], i) => ({
-      k,
-      bars: [{ a: T.systems[i], b: T.systems[i] + (i === 3 ? 0.9 : 0.75), tone: "system" as const, label: v }],
-    })),
-    { k: "Outcome", bars: [{ a: T.outcome, b: DOM, tone: "outcome" as const, label: scene.outcome[0] }] },
+  const state = t < T.think[0] ? "Listening" : t < T.outcome ? "Working" : "Resolved";
+  const talk: { a: number; b: number; who: "caller" | "agent" }[] = [
+    { a: T.caller, b: 2.1, who: "caller" },
+    { a: T.agent, b: 4.1, who: "agent" },
+    { a: T.reply, b: 6, who: "caller" },
   ];
+  const acts = scene.systems.map(([k, v], i) => ({ k, v, a: T.systems[i], b: T.systems[i] + (i === 3 ? 0.9 : 0.7) }));
+  const grow = (a: number, b: number) => Math.max(0, Math.min(1, (head - a) / (b - a)));
 
   return (
     <section aria-label="The live call, traced" className="pb-[clamp(40px,6vw,88px)]">
       <div className="wrap">
-        <div className="mx-auto max-w-[1100px] rounded-[22px] bg-paper p-2 shadow-[0_40px_80px_-50px_rgba(17,18,24,.35)] ring-1 ring-line">
+        <div className="mx-auto max-w-[1040px] rounded-[20px] bg-paper px-5 pb-5 pt-4 shadow-[0_30px_70px_-50px_rgba(17,18,24,.3)] ring-1 ring-line sm:px-7">
           {/* header */}
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
-            <div className="flex items-center gap-3">
-              <span className="grid h-8 w-8 place-items-center rounded-[9px] bg-bone">
-                <Mark centered spinning={working} maxSpeed={11} className="h-4 w-4 text-ink" trail={false} title="" />
-              </span>
-              <span className="text-[14.4px] font-[540]">Live call trace</span>
+          <div className="flex items-center justify-between gap-4 pb-3">
+            <div className="flex items-center gap-2.5 text-[13.5px] font-[540]">
+              <Mark centered spinning={working} maxSpeed={11} className="h-3.5 w-3.5 text-ink" trail={false} title="" />
+              The call, traced
             </div>
-            <span
-              className={`rounded-[8px] px-2.5 py-1 text-[12.15px] transition-colors duration-300 ${
-                state === "Working" ? "bg-sink text-ink" : state === "Listening" ? "bg-sink text-ink-2" : "bg-lime text-ink"
-              }`}
-            >
-              {state}
-            </span>
+            <div className="flex items-center gap-5 text-[12.15px] text-ink-3">
+              <span className="hidden items-center gap-1.5 sm:flex">
+                <span className="h-[5px] w-3 rounded-full bg-ink" /> Caller
+              </span>
+              <span className="hidden items-center gap-1.5 sm:flex">
+                <span className="h-[5px] w-3 rounded-full bg-[#9bbd28]" /> Agent
+              </span>
+              <span className="flex items-center gap-1.5 text-ink">
+                <span className={`h-1.5 w-1.5 rounded-full ${state === "Resolved" ? "bg-lime-deep" : "bg-ink-3"}`} />
+                {state}
+              </span>
+            </div>
           </div>
 
-          {/* lanes */}
-          <div className="overflow-x-auto rounded-[16px] bg-bone">
-            <div className="relative min-w-[620px] px-4 py-4 sm:px-5">
-              {lanes.map((l) => (
-                <div key={l.k} className="grid grid-cols-[132px_1fr] items-center gap-4 py-[5px]">
-                  <span className="truncate text-[13.05px] text-ink-2">{l.k}</span>
-                  <div className="relative h-[26px]">
-                    {l.bars
-                      .filter((b) => b.tone === "system")
-                      .map((b, n) => (
-                        <span
-                          key={`label-${n}`}
-                          className={`absolute inset-y-0 flex items-center whitespace-nowrap pl-2.5 text-[12.15px] text-ink-2 transition-opacity duration-300 ${
-                            head >= b.b ? "opacity-100" : "opacity-0"
-                          }`}
-                          style={{ left: at(b.b) }}
-                        >
-                          {b.label}
-                        </span>
-                      ))}
-                    {l.bars.map((b, n) => {
-                      const shown = Math.max(0, Math.min(1, (head - b.a) / (b.b - b.a)));
-                      return (
-                        <div
-                          key={n}
-                          className="absolute inset-y-0 overflow-hidden"
-                          style={{ left: at(b.a), width: span(b.a, b.b) }}
-                        >
-                          <div
-                            className={`flex h-full items-center overflow-hidden whitespace-nowrap rounded-[7px] transition-[width] duration-100 ease-linear ${
-                              b.tone === "caller"
-                                ? "bg-ink/85"
-                                : b.tone === "agent"
-                                  ? "bg-[#9bbd28]"
-                                  : b.tone === "outcome"
-                                    ? "bg-lime ring-1 ring-lime-deep/30"
-                                    : "bg-lime-deep/85"
-                            }`}
-                            style={{ width: `${shown * 100}%`, opacity: shown > 0 ? 1 : 0 }}
-                          >
-                            {(b.tone === "caller" || b.tone === "agent") && <SpeechTexture tone={b.tone} />}
-                            {b.label && b.tone === "outcome" && <span className="px-2.5 text-[12.15px] font-[540] text-ink">{b.label}</span>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+          <div className="overflow-x-auto">
+            <div className="relative min-w-[600px]">
+              {/* rows */}
+              <Row k="Conversation">
+                {talk.map((b, n) => (
+                  <Bar key={n} a={b.a} b={b.b} g={grow(b.a, b.b)} className={b.who === "caller" ? "bg-ink" : "bg-[#9bbd28]"} />
+                ))}
+              </Row>
+              {acts.map((x) => (
+                <Row key={x.k} k={x.k}>
+                  <Bar a={x.a} b={x.b} g={grow(x.a, x.b)} className="bg-lime-deep" />
+                  <span
+                    className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap pl-3 text-[12.6px] text-ink-2 transition-opacity duration-300 ${head >= x.b ? "opacity-100" : "opacity-0"}`}
+                    style={{ left: at(x.b) }}
+                  >
+                    {x.v}
+                  </span>
+                </Row>
               ))}
-
-              {/* checks */}
-              <div className="mt-2 grid grid-cols-[132px_1fr] items-center gap-4 border-t border-line pt-3">
-                <span className="text-[13.05px] text-ink-2">Checks</span>
-                <div className="relative h-[22px]">
-                  <div className="absolute inset-y-0 right-0 flex items-center gap-1.5">
+              <Row k="Outcome" last>
+                <span
+                  className={`absolute top-1/2 flex -translate-y-1/2 items-center gap-3 whitespace-nowrap transition-all duration-500 ${
+                    t >= T.outcome ? "translate-x-0 opacity-100" : "-translate-x-1 opacity-0"
+                  }`}
+                  style={{ left: at(T.outcome) }}
+                >
+                  <span className="rounded-[7px] bg-lime px-2 py-0.5 text-[12.15px] font-[540] text-ink">{scene.outcome[0]}</span>
+                  <span className="flex gap-1">
                     {Array.from({ length: 6 }, (_, i) => (
                       <span
                         key={`${loop}-${i}`}
-                        className={`h-[16px] w-[16px] rounded-[4.5px] transition-colors duration-200 ${
-                          t >= T.evaluate + 0.2 + i * 0.09 ? "bg-lime ring-1 ring-lime-deep/40" : "bg-paper ring-1 ring-line"
-                        }`}
+                        className={`h-[9px] w-[9px] rounded-[2.5px] transition-colors duration-200 ${t >= T.evaluate + i * 0.09 ? "bg-lime-deep" : "bg-line-2"}`}
                       />
                     ))}
-                    <span className={`order-first mr-2 text-[12.15px] transition-opacity duration-300 ${t >= T.evaluate + 0.8 ? "opacity-100" : "opacity-0"}`}>6 of 6 checks passed</span>
-                  </div>
-                </div>
-              </div>
+                  </span>
+                </span>
+              </Row>
 
               {/* playhead */}
-              <div className="pointer-events-none absolute inset-y-3 left-[calc(132px+16px+16px)] right-4 sm:left-[calc(132px+16px+20px)] sm:right-5">
+              <div className="pointer-events-none absolute inset-y-0 left-[124px] right-0">
                 <span
-                  className="absolute inset-y-0 w-px bg-ink/60 transition-[left] duration-100 ease-linear"
-                  style={{ left: at(head), opacity: t >= T.ends ? 0 : 1 }}
+                  className="absolute inset-y-0 w-px bg-lime-deep/70 transition-[left] duration-100 ease-linear"
+                  style={{ left: at(head), opacity: t >= DOM - 0.05 ? 0 : 1 }}
                   aria-hidden
                 />
-              </div>
-
-              {/* axis */}
-              <div className="mt-3 grid grid-cols-[132px_1fr] gap-4">
-                <span />
-                <div className="flex justify-between font-mono text-[10.8px] text-ink-3">
-                  {[0, 10, 20, 30, 40].map((s) => (
-                    <span key={s}>0:{String(s).padStart(2, "0")}</span>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
@@ -665,17 +620,19 @@ function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
   );
 }
 
-/** A soft voice texture inside a speech bar. */
-function SpeechTexture({ tone }: { tone: "caller" | "agent" }) {
+function Row({ k, last, children }: { k: string; last?: boolean; children: ReactNode }) {
   return (
-    <span className="flex h-full flex-1 items-center gap-[3px] px-2" aria-hidden>
-      {Array.from({ length: 40 }, (_, i) => (
-        <span
-          key={i}
-          className={`w-[2px] shrink-0 rounded-full ${tone === "caller" ? "bg-bone/50" : "bg-ink/35"}`}
-          style={{ height: `${30 + ((i * 53) % 55)}%` }}
-        />
-      ))}
+    <div className={`grid grid-cols-[124px_1fr] items-center ${last ? "" : "border-b border-line/70"}`}>
+      <span className="truncate py-3 text-[12.6px] text-ink-3">{k}</span>
+      <div className="relative h-[40px]">{children}</div>
+    </div>
+  );
+}
+
+function Bar({ a, b, g, className }: { a: number; b: number; g: number; className: string }) {
+  return (
+    <span className="absolute top-1/2 h-[6px] -translate-y-1/2" style={{ left: at(a), width: span(a, b) }}>
+      <span className={`block h-full rounded-full transition-[width] duration-100 ease-linear ${className}`} style={{ width: `${g * 100}%`, opacity: g > 0 ? 1 : 0 }} />
     </span>
   );
 }

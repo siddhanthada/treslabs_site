@@ -100,3 +100,39 @@ export function BeforeAfter() {
       </div>
   );
 }
+
+/** One side of the story as a compact moment: who called, what they said, and the verdict. */
+export function Moment({ side }: { side: "before" | "after" }) {
+  const s = SIDES[side === "before" ? 0 : 1];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.5 }}
+      transition={{ duration: 0.7, ease: ease.out }}
+      className="flex w-full max-w-[640px] gap-4 rounded-[20px] bg-paper p-3 shadow-[0_24px_48px_-34px_rgba(17,18,24,.45)] ring-1 ring-ink/5 sm:gap-5"
+    >
+      <Pixel
+        src={s.who.src}
+        focus={s.who.focus}
+        cols={30}
+        zoom={s.zoom}
+        build={1.4}
+        scan={false}
+        className="aspect-square w-[108px] shrink-0 overflow-hidden rounded-[14px] bg-sink sm:w-[132px]"
+        alt=""
+      />
+      <div className="flex min-w-0 flex-1 flex-col justify-center py-1 pr-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 rounded-[7px] px-2 py-0.5 text-[11.7px] ${s.bad ? "bg-fault-tint/70 text-[#8f3a1d]" : "bg-lime text-ink"}`}>
+            <Phone className="h-3 w-3" />
+            {s.tag}
+          </span>
+          <span className={`text-[12.15px] ${s.bad ? "text-[#a8411f]" : "text-lime-deep"}`}>{s.checks}</span>
+        </div>
+        <p className="speech-caller mt-2.5 text-[clamp(19px,1.9vw,25px)] leading-[1.15]">{s.line}</p>
+        <p className="mt-2 text-[13.05px] leading-[1.45] text-ink-2">{s.note}</p>
+      </div>
+    </motion.div>
+  );
+}

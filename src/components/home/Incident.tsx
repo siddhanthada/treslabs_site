@@ -193,28 +193,51 @@ export function Incident() {
               </svg>
             </div>
 
-            {/* what it adds up to */}
-            <div className="mt-8 grid gap-px overflow-hidden rounded-[16px] bg-carbon-line sm:grid-cols-3">
-              {[
-                { v: "7 min", k: "to catch it and pause" },
-                { v: "5 min", k: "to be back on v15" },
-                { v: "6 of 6", k: "affected customers corrected" },
-              ].map((s, n) => (
-                <motion.div
-                  key={s.k}
-                  initial={false}
-                  animate={{ opacity: done || reduce ? 1 : 0.35 }}
-                  transition={{ duration: 0.5, delay: n * 0.12 }}
-                  className="bg-carbon-2 px-6 py-5"
-                >
-                  <div className="text-[clamp(26px,2.6vw,34px)] font-[500] leading-none tracking-[-0.035em] text-bone">{s.v}</div>
-                  <div className="mt-2 text-[12.6px] text-on-carbon-2">{s.k}</div>
-                </motion.div>
-              ))}
+            {/* what it adds up to — revealed once the afternoon has played out */}
+            <div className="mt-8 grid min-h-[104px] gap-px overflow-hidden rounded-[16px] sm:grid-cols-3">
+              <AnimatePresence>
+                {(done || reduce) &&
+                  [
+                    { n: 7, unit: " min", k: "to catch it and pause" },
+                    { n: 5, unit: " min", k: "to be back on v15" },
+                    { n: 6, unit: " of 6", k: "affected customers corrected" },
+                  ].map((s, i) => (
+                    <motion.div
+                      key={s.k}
+                      initial={reduce ? false : { opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: ease.out, delay: 0.15 + i * 0.18 }}
+                      className="bg-carbon-2 px-6 py-5 first:rounded-l-[16px] last:rounded-r-[16px] max-sm:first:rounded-t-[16px] max-sm:last:rounded-b-[16px] max-sm:first:rounded-bl-none max-sm:last:rounded-tr-none"
+                    >
+                      <div className="text-[clamp(26px,2.6vw,34px)] font-[500] leading-none tracking-[-0.035em] text-bone">
+                        <CountUp to={s.n} delay={0.15 + i * 0.18} skip={!!reduce} />
+                        {s.unit}
+                      </div>
+                      <div className="mt-2 text-[12.6px] text-on-carbon-2">{s.k}</div>
+                    </motion.div>
+                  ))}
+              </AnimatePresence>
             </div>
           </div>
         </Stage>
       </div>
     </Section>
   );
+}
+
+function CountUp({ to, delay, skip }: { to: number; delay: number; skip: boolean }) {
+  const [v, setV] = useState(skip ? to : 0);
+  useEffect(() => {
+    if (skip) return;
+    let raf = 0;
+    const t0 = performance.now() + delay * 1000;
+    const tick = (now: number) => {
+      const p = Math.max(0, Math.min(1, (now - t0) / 700));
+      setV(Math.round((1 - Math.pow(1 - p, 3)) * to));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to, delay, skip]);
+  return <>{v}</>;
 }

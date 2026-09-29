@@ -62,7 +62,7 @@ export function Sampling() {
       eyebrow="The problem"
       title="Most voice agents stop improving the day they go live."
       sub="Teams listen to a handful of calls and hope they’re representative. They rarely are."
-      align="split"
+      align="left"
     >
       <div ref={ref}>
         <Stage tone="sand">

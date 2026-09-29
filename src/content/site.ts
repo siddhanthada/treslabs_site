@@ -235,14 +235,3 @@ export const faq = [
     draft: true,
   },
 ];
-
-/* ─── The team ────────────────────────────────────────────────────────── */
-
-/** PLACEHOLDER backgrounds — replace with each person's real one line. */
-export const team = [
-  { name: "Rahul", role: "Leads Treslabs", was: "Previously —", draft: true },
-  { name: "Omkar", role: "Product", was: "Previously —", draft: true },
-  { name: "Vikrant", role: "Engineering", was: "Previously —", draft: true },
-  { name: "Nupur", role: "People and hiring", was: "Previously —", draft: true },
-  { name: "Siddhant", role: "Design", was: "Previously —", draft: true },
-];
