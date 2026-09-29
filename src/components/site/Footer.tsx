@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
+import { Sep } from "@/components/site/Sep";
 
 /* PLACEHOLDER links (#) are pages that don't exist yet. */
 const cols = [
@@ -49,7 +50,11 @@ export function Footer() {
                   <span className="absolute inset-0 animate-ping rounded-full bg-lime/60" />
                   <span className="relative h-1.5 w-1.5 rounded-full bg-lime" />
                 </span>
-                Private beta · onboarding early teams
+                <span className="inline-flex items-center">
+                  Private beta
+                  <Sep />
+                  onboarding early teams
+                </span>
               </div>
             </div>
             {cols.map((c, i) => (

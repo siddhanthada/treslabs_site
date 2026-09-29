@@ -7,6 +7,7 @@ import { contact } from "@/content/scenario";
 import { Button } from "@/components/site/Button";
 import { Mark } from "@/components/brand/Mark";
 import { Phone } from "@/components/brand/Phone";
+import { Sep } from "@/components/site/Sep";
 import { Pixel, PEOPLE } from "@/components/brand/Pixel";
 import { ease } from "@/lib/motion";
 
@@ -215,7 +216,11 @@ export function Hero() {
                 <span className="absolute inset-0 animate-ping rounded-full bg-lime-deep/35" />
                 <span className="relative h-[7px] w-[7px] rounded-full bg-lime-deep" />
               </span>
-              Private beta · now onboarding early teams
+              <span className="inline-flex items-center">
+                Private beta
+                <Sep />
+                now onboarding early teams
+              </span>
             </span>
           </motion.div>
           <motion.h1
