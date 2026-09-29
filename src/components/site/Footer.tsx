@@ -72,7 +72,8 @@ export function Footer() {
               </div>
             ))}
           </div>
-          <div className="t-label mt-10 flex flex-col gap-2 text-on-carbon-3 md:flex-row md:justify-between">
+          {/* right padding keeps the last line clear of the back-to-top button */}
+          <div className="t-label mt-10 flex flex-col gap-2 pr-14 text-on-carbon-3 md:flex-row md:justify-between">
             <span>© 2026 Treslabs</span>
             <span className="max-w-[70ch]">Examples use Harrow &amp; Finch, a fictional retailer, to show how Treslabs works.</span>
           </div>

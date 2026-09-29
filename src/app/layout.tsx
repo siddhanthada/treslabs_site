@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/site/Nav";
+import { ScrollTop } from "@/components/site/ScrollTop";
 
 const sans = Instrument_Sans({
   variable: "--font-instrument-sans",
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* one nav for every page, so it can animate as the page changes */}
         <Nav />
         {children}
+        <ScrollTop />
       </body>
     </html>
   );
