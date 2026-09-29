@@ -18,7 +18,7 @@ export function CTA() {
             Send a recording
           </Button>
           <Button href="/#partners" variant="ghost-dark">
-            Become a partner
+            Join the private beta
           </Button>
         </Reveal>
       </div>

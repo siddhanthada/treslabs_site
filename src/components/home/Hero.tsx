@@ -211,7 +211,7 @@ export function Hero() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
             <span className="inline-flex items-center gap-2.5 text-[12.15px] font-[480] text-ink-2">
               <span className="live-dot !h-1.5 !w-1.5" />
-              Private beta · now taking on early customers
+              Private beta · now onboarding early teams
             </span>
           </motion.div>
           <motion.h1
@@ -238,7 +238,7 @@ export function Hero() {
             className="mt-7 flex flex-wrap justify-center gap-3"
           >
             <Button href="#partners" variant="lime" arrow>
-              Become a partner
+              Join the private beta
             </Button>
             <Button href={contact.sendCall} variant="line">
               Send us a call

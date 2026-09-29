@@ -108,7 +108,7 @@ export const posts: Post[] = [
       },
       {
         type: "p",
-        text: "We’re building it with a small group of early customers before launch. If your team lives with a voice line that should be getting better, we’d like to hear one of your calls.",
+        text: "We’re building it with a small group of early teams before launch. If your team lives with a voice line that should be getting better, we’d like to hear one of your calls.",
       },
     ],
   },

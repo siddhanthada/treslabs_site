@@ -26,13 +26,13 @@ export function Partners() {
       <div className="wrap grid items-center gap-12 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-5">
           <Reveal>
-            <Eyebrow>Early access</Eyebrow>
+            <Eyebrow>Private beta</Eyebrow>
           </Reveal>
           <Reveal as="h2" className="mt-5 text-[clamp(34px,4.4vw,60px)] font-[540] leading-[0.98] tracking-[-0.042em]" delay={0.05}>
             Build it with us.
           </Reveal>
           <Reveal as="p" className="mt-5 max-w-[24rem] text-[15.3px] leading-[1.5] text-ink-2" delay={0.1}>
-            A few early customers pilot Treslabs before launch — and shape what ships.
+            A few early teams pilot Treslabs before launch — and shape what ships.
           </Reveal>
           <ul className="mt-8 grid gap-2.5">
             {GETS.map((g, i) => (
@@ -48,7 +48,7 @@ export function Partners() {
           </ul>
           <Reveal className="mt-10 flex flex-wrap gap-3" delay={0.3}>
             <Button href={links.partner} variant="lime" arrow>
-              Apply for early access
+              Join the private beta
             </Button>
             <Button href={links.sendCall} variant="line">
               Send us one call

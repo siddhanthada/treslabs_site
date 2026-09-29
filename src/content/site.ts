@@ -10,7 +10,7 @@
 
 /** PLACEHOLDER addresses — replace before publishing. */
 export const links = {
-  partner: "mailto:hello@treslabs.ai?subject=Early%20access",
+  partner: "mailto:hello@treslabs.ai?subject=Join%20the%20private%20beta",
   sendCall: "mailto:hello@treslabs.ai?subject=One%20call%20for%20Treslabs",
   newsletter: "mailto:hello@treslabs.ai?subject=Subscribe%20to%20Treslabs%20writing",
 };
@@ -181,7 +181,7 @@ export const tryIt = {
   checks: ["Resolved", "Policy followed", "Caller verified", "No talking over", "Answered in time", "Right handover"],
 };
 
-/* ─── Early customers (pilot programme) ─────────────────────────────────────────────────── */
+/* ─── Private beta: early teams ─────────────────────────────────────────────────── */
 
 export const partnerGets = [
   { t: "Your calls, evaluated", d: "We run Treslabs on your recordings before anything goes live." },
@@ -203,10 +203,10 @@ export const pathToLive = [
 export const faq = [
   {
     q: "Is Treslabs live?",
-    a: "We’re in private beta. Every new version is tested on real phone calls each week, and we’re taking on a small group of early customers before launch.",
+    a: "We’re in private beta. Every new version is tested on real phone calls each week, and we’re onboarding a small group of early teams before launch.",
   },
   {
-    q: "What does an early customer commit to?",
+    q: "What does an early team commit to?",
     a: "Recordings from your current line, a named owner on your side, and a weekly session with us. In return you shape the product and keep launch terms.",
   },
   {

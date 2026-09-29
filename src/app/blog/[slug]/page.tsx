@@ -95,11 +95,11 @@ export default async function Article({ params }: Params) {
                   <Mark centered className="mt-1 h-7 w-7 shrink-0 text-lime" trail={false} title="" />
                   <div>
                     <div className="text-[19.8px] font-[540] tracking-[-0.02em]">Shape Treslabs before launch.</div>
-                    <p className="mt-1.5 text-[13.5px] leading-[1.5] text-on-carbon-2">We’re taking on a few early customers. Send us one call to start.</p>
+                    <p className="mt-1.5 text-[13.5px] leading-[1.5] text-on-carbon-2">We’re onboarding a few early teams. Send us one call to start.</p>
                   </div>
                 </div>
                 <Button href={links.partner} variant="lime" arrow>
-                  Apply
+                  Join the private beta
                 </Button>
               </div>
             </div>
