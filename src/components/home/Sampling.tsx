@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { Card, Section } from "@/components/site/Section";
+import { Section } from "@/components/site/Section";
+import { Stage } from "@/components/site/Stage";
 import { mulberry32, ease } from "@/lib/motion";
 
 const TABS = [
@@ -49,9 +50,9 @@ export function Sampling() {
 
   const fill = (i: number) => {
     const f = fail.has(i);
-    if (tab === 0) return early && f ? "var(--color-fault)" : "var(--color-sink)";
-    if (tab === 1) return f ? "var(--color-fault)" : "var(--color-sink)";
-    if (tab === 2) return qa.has(i) ? (f ? "var(--color-fault)" : "var(--color-ink)") : "var(--color-sink)";
+    if (tab === 0) return early && f ? "var(--color-fault)" : "#dcdbd2";
+    if (tab === 1) return f ? "var(--color-fault)" : "#dcdbd2";
+    if (tab === 2) return qa.has(i) ? (f ? "var(--color-fault)" : "var(--color-ink)") : "#dcdbd2";
     return f ? "var(--color-fault)" : "var(--color-lime)";
   };
 
@@ -61,9 +62,11 @@ export function Sampling() {
       eyebrow="The problem"
       title="Most voice agents stop improving the day they go live."
       sub="Teams listen to a handful of calls and hope they’re representative. They rarely are."
+      align="split"
     >
       <div ref={ref}>
-        <Card className="grid items-center gap-10 p-6 md:p-10 lg:grid-cols-2 lg:gap-16">
+        <Stage tone="sand">
+        <div className="grid items-center gap-10 p-6 md:p-12 lg:grid-cols-2 lg:gap-16">
           <div className="grid gap-[3.6px]" style={{ gridTemplateColumns: "repeat(27, minmax(0, 1fr))" }} aria-hidden>
             {Array.from({ length: 540 }, (_, i) => {
               const order = (tab === 0 && early) || tab === 1 ? fillOrder.get(i) : undefined;
@@ -94,7 +97,7 @@ export function Sampling() {
                     setAuto(false);
                   }}
                   className={`rounded-[9px] px-4 py-2 text-[12.6px] transition-colors ${
-                    tab === i ? (i === 3 ? "bg-lime text-ink" : "bg-ink text-bone") : "bg-sink text-ink-2 hover:text-ink"
+                    tab === i ? (i === 3 ? "bg-lime text-ink" : "bg-ink text-bone") : "bg-paper/70 text-ink-2 hover:text-ink"
                   }`}
                 >
                   {t.k}
@@ -122,7 +125,8 @@ export function Sampling() {
               <Legend c="var(--color-lime)" t="Evaluated by Treslabs" />
             </div>
           </div>
-        </Card>
+        </div>
+        </Stage>
       </div>
     </Section>
   );

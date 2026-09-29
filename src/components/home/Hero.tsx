@@ -289,7 +289,7 @@ export function Hero() {
         <Drop className="min-h-12 flex-1" on={t > T.caller && !ended} pulses={T.drop} t={t} loop={loop} dur={DROP_DUR} />
       </section>
 
-      <Flow t={t} loop={loop} scene={scene} />
+      <Trace t={t} loop={loop} scene={scene} />
     </div>
   );
 }
@@ -521,152 +521,162 @@ function Drop({
   );
 }
 
-/* ── The call flow, laid out horizontally on a 1100 × 300 plan ── */
+/* ── The live call trace ─────────────────────────────────────────────────
+   The same call as the hero, drawn the way engineers read a request: lanes for
+   who spoke and what Treslabs did in each system, a playhead, and the checks
+   landing at the end. Evidence, not a flowchart. */
 
-const W = 1100;
-const H = 300;
-const pct = (v: number, of: number) => `${(v / of) * 100}%`;
-type Pt = [number, number];
+const DOM = 8.4; // seconds of the loop shown on the trace
+const at = (v: number) => `${(Math.min(v, DOM) / DOM) * 100}%`;
+const span = (a: number, b: number) => `${((Math.min(b, DOM) - a) / DOM) * 100}%`;
 
-const CORE = { x: 480, y: 90, s: 140 };
-const MID = CORE.y + CORE.s / 2;
-const SYS_Y = [18, 88, 158, 228];
-const SYS = { x: 20, w: 230, h: 60 };
-const OUT = { x: 670, y: MID - 55, w: 190, h: 110 };
-const EVAL = { x: 890, y: MID - 55, w: 190, h: 110 };
-const SPEED = 900; // plan units per second for pulses
+function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
+  const head = Math.min(t, DOM);
+  const working = t > T.think[0] && t < T.outcome;
+  const state = t < T.think[0] ? "Listening" : t < T.outcome ? "Working" : t < T.ends ? "Resolved" : "Evaluated";
+  const lanes: { k: string; bars: { a: number; b: number; tone: "caller" | "agent" | "system" | "outcome"; label?: string }[] }[] = [
+    {
+      k: "Caller",
+      bars: [
+        { a: T.caller, b: 2.1, tone: "caller" },
+        { a: T.reply, b: 6, tone: "caller" },
+      ],
+    },
+    { k: "Agent", bars: [{ a: T.agent, b: 4.1, tone: "agent" }] },
+    ...scene.systems.map(([k, v], i) => ({
+      k,
+      bars: [{ a: T.systems[i], b: T.systems[i] + (i === 3 ? 0.9 : 0.75), tone: "system" as const, label: v }],
+    })),
+    { k: "Outcome", bars: [{ a: T.outcome, b: DOM, tone: "outcome" as const, label: scene.outcome[0] }] },
+  ];
 
-const ENTRY: Pt[] = [
-  [W / 2, 0],
-  [W / 2, CORE.y],
-];
-const toSystem = (y: number): Pt[] => [
-  [CORE.x, MID],
-  [380, MID],
-  [380, y + SYS.h / 2],
-  [SYS.x + SYS.w, y + SYS.h / 2],
-];
-const TO_OUT: Pt[] = [
-  [CORE.x + CORE.s, MID],
-  [OUT.x, MID],
-];
-const TO_EVAL: Pt[] = [
-  [OUT.x + OUT.w, MID],
-  [EVAL.x, MID],
-];
-
-function Flow({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
-  const on = (a: number) => t >= a;
-  const thinking = t > T.think[0] && t < T.think[1];
-  const state = thinking ? "working…" : t >= T.systems[0] && t < T.outcome ? "acting" : t >= T.outcome ? "done" : "listening";
-  const window_ = (a: number, d = 0.8) => t >= a && t < a + d;
   return (
-    <section aria-label="How one call flows through Treslabs" className="pb-[clamp(32px,5vw,72px)]">
+    <section aria-label="The live call, traced" className="pb-[clamp(40px,6vw,88px)]">
       <div className="wrap">
-        {/* desktop: the full horizontal map */}
-        <div
-          className="relative mx-auto hidden w-full max-w-[1100px] md:block"
-          style={{ aspectRatio: `${W} / ${H}` }}
-          role="img"
-          aria-label="The caller's voice reaches Treslabs, which works in your systems, resolves the call, and scores it."
-        >
-          <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
-            <Wire pts={ENTRY} on={t > T.caller && t < T.ends} warm />
-            {SYS_Y.map((y, i) => (
-              <Wire key={i} pts={toSystem(y)} on={on(T.systems[i])} />
-            ))}
-            <Wire pts={TO_OUT} on={on(T.outcome)} />
-            <Wire pts={TO_EVAL} on={on(T.evaluate)} />
+        <div className="mx-auto max-w-[1100px] rounded-[22px] bg-paper p-2 shadow-[0_40px_80px_-50px_rgba(17,18,24,.35)] ring-1 ring-line">
+          {/* header */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+            <div className="flex items-center gap-3">
+              <span className="grid h-8 w-8 place-items-center rounded-[9px] bg-bone">
+                <Mark centered spinning={working} maxSpeed={11} className="h-4 w-4 text-ink" trail={false} title="" />
+              </span>
+              <span className="text-[14.4px] font-[540]">Live call trace</span>
+            </div>
+            <span
+              className={`rounded-[8px] px-2.5 py-1 text-[12.15px] transition-colors duration-300 ${
+                state === "Working" ? "bg-sink text-ink" : state === "Listening" ? "bg-sink text-ink-2" : "bg-lime text-ink"
+              }`}
+            >
+              {state}
+            </span>
+          </div>
 
-            {T.entry.map((a) => window_(a) && <Pulse key={`e${a}-${loop}`} pts={ENTRY} warm />)}
-            {SYS_Y.map((y, i) => window_(T.systems[i], 1) && <Pulse key={`s${i}-${loop}`} pts={toSystem(y)} />)}
-            {window_(T.outcome) && <Pulse key={`o-${loop}`} pts={TO_OUT} />}
-            {window_(T.evaluate) && <Pulse key={`v-${loop}`} pts={TO_EVAL} />}
-          </svg>
-
-          {scene.systems.map(([k, v], i) => {
-            const lit = on(T.systems[i] + 0.35);
-            return (
-              <Box key={i} x={SYS.x} y={SYS_Y[i]} w={SYS.w} h={SYS.h}>
-                <span
-                  className={`absolute -right-[3.6px] top-1/2 h-[7.2px] w-[7.2px] -translate-y-1/2 rounded-[2.7px] transition-colors duration-300 ${
-                    lit ? "bg-lime-deep" : "bg-line-2"
-                  }`}
-                />
-                <div className="flex h-full flex-col justify-center px-4">
-                  <div className="text-[12.15px] font-[540]">{k}</div>
-                  <motion.div
-                    initial={false}
-                    animate={{ opacity: lit ? 1 : 0, y: lit ? 0 : 3 }}
-                    transition={{ duration: 0.3 }}
-                    className="t-label mt-1 truncate text-ink-2"
-                  >
-                    {v}
-                  </motion.div>
+          {/* lanes */}
+          <div className="overflow-x-auto rounded-[16px] bg-bone">
+            <div className="relative min-w-[620px] px-4 py-4 sm:px-5">
+              {lanes.map((l) => (
+                <div key={l.k} className="grid grid-cols-[132px_1fr] items-center gap-4 py-[5px]">
+                  <span className="truncate text-[13.05px] text-ink-2">{l.k}</span>
+                  <div className="relative h-[26px]">
+                    {l.bars
+                      .filter((b) => b.tone === "system")
+                      .map((b, n) => (
+                        <span
+                          key={`label-${n}`}
+                          className={`absolute inset-y-0 flex items-center whitespace-nowrap pl-2.5 text-[12.15px] text-ink-2 transition-opacity duration-300 ${
+                            head >= b.b ? "opacity-100" : "opacity-0"
+                          }`}
+                          style={{ left: at(b.b) }}
+                        >
+                          {b.label}
+                        </span>
+                      ))}
+                    {l.bars.map((b, n) => {
+                      const shown = Math.max(0, Math.min(1, (head - b.a) / (b.b - b.a)));
+                      return (
+                        <div
+                          key={n}
+                          className="absolute inset-y-0 overflow-hidden"
+                          style={{ left: at(b.a), width: span(b.a, b.b) }}
+                        >
+                          <div
+                            className={`flex h-full items-center overflow-hidden whitespace-nowrap rounded-[7px] transition-[width] duration-100 ease-linear ${
+                              b.tone === "caller"
+                                ? "bg-ink/85"
+                                : b.tone === "agent"
+                                  ? "bg-[#9bbd28]"
+                                  : b.tone === "outcome"
+                                    ? "bg-lime ring-1 ring-lime-deep/30"
+                                    : "bg-lime-deep/85"
+                            }`}
+                            style={{ width: `${shown * 100}%`, opacity: shown > 0 ? 1 : 0 }}
+                          >
+                            {(b.tone === "caller" || b.tone === "agent") && <SpeechTexture tone={b.tone} />}
+                            {b.label && b.tone === "outcome" && <span className="px-2.5 text-[12.15px] font-[540] text-ink">{b.label}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </Box>
-            );
-          })}
+              ))}
 
-          <Box x={CORE.x} y={CORE.y} w={CORE.s} h={CORE.s} label="treslabs · v15" solid glow={thinking}>
-            <div className="absolute inset-0 grid place-items-center">
-              <Mark centered spinning={thinking} maxSpeed={11} className="h-[44%] w-[44%] text-ink" trail={false} title="" />
-            </div>
-            <div className="t-label absolute inset-x-0 bottom-2.5 text-center text-ink-3">{state}</div>
-          </Box>
-
-          <Box x={OUT.x} y={OUT.y} w={OUT.w} h={OUT.h} label="outcome">
-            <div className="flex h-full items-center gap-3.5 px-4 pt-4">
-              <span
-                className={`grid h-9 w-9 shrink-0 place-items-center rounded-[9px] transition-colors duration-300 ${
-                  on(T.outcome + 0.3) ? "bg-lime text-ink" : "bg-sink text-ink-3"
-                }`}
-              >
-                <Check />
-              </span>
-              <motion.div initial={false} animate={{ opacity: on(T.outcome + 0.3) ? 1 : 0.35 }} transition={{ duration: 0.3 }} className="min-w-0">
-                <div className="truncate text-[13.05px] font-[540]">{on(T.outcome + 0.3) ? scene.outcome[0] : "Waiting…"}</div>
-                <div className="t-label mt-1 text-ink-2">{on(T.outcome + 0.3) ? scene.outcome[1] : "—"}</div>
-              </motion.div>
-            </div>
-          </Box>
-
-          <Box x={EVAL.x} y={EVAL.y} w={EVAL.w} h={EVAL.h} label="evaluation">
-            <div className="flex h-full flex-col justify-center px-4 pt-5">
-              <div className="flex gap-1.5">
-                {Array.from({ length: 6 }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`h-[14.4px] flex-1 rounded-[3.6px] border transition-colors duration-200 ${
-                      on(T.evaluate + 0.3 + i * 0.09) ? "border-lime-deep/50 bg-lime" : "border-line-2"
-                    }`}
-                  />
-                ))}
+              {/* checks */}
+              <div className="mt-2 grid grid-cols-[132px_1fr] items-center gap-4 border-t border-line pt-3">
+                <span className="text-[13.05px] text-ink-2">Checks</span>
+                <div className="relative h-[22px]">
+                  <div className="absolute inset-y-0 right-0 flex items-center gap-1.5">
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <span
+                        key={`${loop}-${i}`}
+                        className={`h-[16px] w-[16px] rounded-[4.5px] transition-colors duration-200 ${
+                          t >= T.evaluate + 0.2 + i * 0.09 ? "bg-lime ring-1 ring-lime-deep/40" : "bg-paper ring-1 ring-line"
+                        }`}
+                      />
+                    ))}
+                    <span className={`order-first mr-2 text-[12.15px] transition-opacity duration-300 ${t >= T.evaluate + 0.8 ? "opacity-100" : "opacity-0"}`}>6 of 6 checks passed</span>
+                  </div>
+                </div>
               </div>
-              <div className="t-label mt-2.5 text-ink-2">{on(T.evaluate + 0.3) ? "6 of 6 checks" : "waiting…"}</div>
-            </div>
-          </Box>
-        </div>
 
-        {/* mobile: the same steps, stacked */}
-        <ol className="mx-auto grid max-w-sm gap-2 md:hidden">
-          {[
-            { k: "Treslabs", v: state, on: t > T.think[0] },
-            ...scene.systems.map(([k, v], i) => ({ k, v, on: on(T.systems[i] + 0.35) })),
-            { k: "Outcome", v: scene.outcome[0], on: on(T.outcome + 0.3) },
-            { k: "Evaluation", v: "6 of 6 checks", on: on(T.evaluate + 0.3) },
-          ].map((s, i) => (
-            <li key={i} className="flex items-center justify-between gap-3 rounded-[12.6px] border border-line bg-paper px-4 py-3">
-              <span className="flex items-center gap-2.5 text-[13.05px] font-[540]">
-                <span className={`h-[7.2px] w-[7.2px] rounded-[2.7px] transition-colors ${s.on ? "bg-lime-deep" : "bg-line-2"}`} />
-                {s.k}
-              </span>
-              <span className={`t-label truncate text-ink-2 transition-opacity ${s.on ? "opacity-100" : "opacity-30"}`}>{s.v}</span>
-            </li>
-          ))}
-        </ol>
+              {/* playhead */}
+              <div className="pointer-events-none absolute inset-y-3 left-[calc(132px+16px+16px)] right-4 sm:left-[calc(132px+16px+20px)] sm:right-5">
+                <span
+                  className="absolute inset-y-0 w-px bg-ink/60 transition-[left] duration-100 ease-linear"
+                  style={{ left: at(head), opacity: t >= T.ends ? 0 : 1 }}
+                  aria-hidden
+                />
+              </div>
+
+              {/* axis */}
+              <div className="mt-3 grid grid-cols-[132px_1fr] gap-4">
+                <span />
+                <div className="flex justify-between font-mono text-[10.8px] text-ink-3">
+                  {[0, 10, 20, 30, 40].map((s) => (
+                    <span key={s}>0:{String(s).padStart(2, "0")}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
+  );
+}
+
+/** A soft voice texture inside a speech bar. */
+function SpeechTexture({ tone }: { tone: "caller" | "agent" }) {
+  return (
+    <span className="flex h-full flex-1 items-center gap-[3px] px-2" aria-hidden>
+      {Array.from({ length: 40 }, (_, i) => (
+        <span
+          key={i}
+          className={`w-[2px] shrink-0 rounded-full ${tone === "caller" ? "bg-bone/50" : "bg-ink/35"}`}
+          style={{ height: `${30 + ((i * 53) % 55)}%` }}
+        />
+      ))}
+    </span>
   );
 }
 
@@ -680,73 +690,8 @@ function Check({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-function Box({
-  x,
-  y,
-  w,
-  h,
-  label,
-  solid,
-  glow,
-  children,
-}: {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  label?: string;
-  solid?: boolean;
-  glow?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className={`absolute rounded-[12.6px] border transition-shadow duration-500 ${solid ? "border-line-2 bg-paper shadow-[0_10px_30px_-16.2px_rgba(17,18,24,.35)]" : "border-line bg-paper"} ${glow ? "!shadow-[0_0_0_6px_rgba(215,243,106,.55),0_10px_30px_-16.2px_rgba(17,18,24,.35)]" : ""}`}
-      style={{ left: pct(x, W), top: pct(y, H), width: pct(w, W), height: pct(h, H) }}
-    >
-      {label && <span className="t-label absolute left-3.5 top-3 text-ink-3">{label}</span>}
-      {children}
-    </div>
-  );
-}
 
-function Wire({ pts, on, warm }: { pts: Pt[]; on: boolean; warm?: boolean }) {
-  const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0]} ${p[1]}`).join(" ");
-  return (
-    <path
-      d={d}
-      fill="none"
-      stroke={on ? (warm ? "#56720a" : "#111218") : "#cdcdc5"}
-      strokeWidth={1}
-      strokeDasharray="4 5"
-      vectorEffect="non-scaling-stroke"
-      className="wire-flow"
-      style={{ transition: "stroke 400ms" }}
-    />
-  );
-}
 
-/** A small square travelling along a wire. */
-function Pulse({ pts, warm }: { pts: Pt[]; warm?: boolean }) {
-  const lens = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
-  const total = lens.reduce((a, b) => a + b, 0);
-  const times = [0, ...lens.map((_, i) => lens.slice(0, i + 1).reduce((a, b) => a + b, 0) / total)];
-  return (
-    <motion.rect
-      width={7}
-      height={7}
-      rx={2}
-      fill={warm ? "#56720a" : "#111218"}
-      initial={{ x: pts[0][0] - 3.5, y: pts[0][1] - 3.5, opacity: 1 }}
-      animate={{
-        x: pts.map((p) => p[0] - 3.5),
-        y: pts.map((p) => p[1] - 3.5),
-        opacity: pts.map((_, i) => (i === pts.length - 1 ? 0 : 1)),
-      }}
-      transition={{ duration: 0.2 + total / SPEED, times, ease: "linear" }}
-    />
-  );
-}
 
 function Voice({ active }: { active: boolean }) {
   return (

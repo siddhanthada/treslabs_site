@@ -7,7 +7,7 @@ import { Stage } from "@/components/site/Stage";
 import { Eyebrow } from "@/components/brand/Frame";
 import { Mark } from "@/components/brand/Mark";
 import { Draft } from "@/components/site/Draft";
-import { links, pathToLive } from "@/content/site";
+import { links, pathToLive, team } from "@/content/site";
 import { ease } from "@/lib/motion";
 
 /*
@@ -108,6 +108,33 @@ export function Partners() {
             </div>
           </Stage>
         </div>
+      </div>
+
+      {/* who's building it */}
+      <div className="wrap mt-20 md:mt-24">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-t border-line pt-10">
+          <h3 className="text-[clamp(22px,2.4vw,32px)] font-[540] tracking-[-0.028em]">The people building it.</h3>
+          <p className="max-w-[24rem] text-[14.4px] leading-[1.5] text-ink-2">You’ll work with us directly — no account managers in between.</p>
+        </div>
+        <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {team.map((p, i) => (
+            <motion.li
+              key={p.name}
+              initial={reduce ? false : { opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.5, ease: ease.out, delay: i * 0.07 }}
+              className="rounded-[18px] bg-paper p-5 ring-1 ring-line"
+            >
+              <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-ink text-[17px] font-[540] text-lime">{p.name[0]}</span>
+              <div className="mt-5 text-[16.2px] font-[540] tracking-[-0.01em]">{p.name}</div>
+              <div className="mt-0.5 text-[13.05px] text-ink-2">{p.role}</div>
+              <div className="mt-3 flex items-center gap-2 text-[12.15px] text-ink-3">
+                {p.was} {p.draft && <Draft />}
+              </div>
+            </motion.li>
+          ))}
+        </ul>
       </div>
     </section>
   );

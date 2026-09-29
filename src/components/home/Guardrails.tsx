@@ -30,11 +30,14 @@ export function Guardrails() {
   }, [i, inView, reduce, auto]);
 
   return (
-    <Section id="guardrails" eyebrow="Goals and guardrails" title="Tell it what to achieve. And where to stop." sub="No flowcharts. A goal, the actions it may take, and the lines it won’t cross.">
-      <div ref={ref}>
-        {/* industry switcher: a quiet segmented control */}
-        <div className="flex justify-center">
-          <div className="inline-flex rounded-[12px] border border-line bg-paper p-1" role="tablist" aria-label="Industries">
+    <Section
+      id="guardrails"
+      eyebrow="Goals and guardrails"
+      title="Tell it what to achieve. And where to stop."
+      sub="No flowcharts. A goal, the actions it may take, and the lines it won’t cross."
+      align="split"
+      aside={
+        <div className="inline-flex rounded-[12px] border border-line bg-paper p-1" role="tablist" aria-label="Industries">
             {industries.map((x, j) => (
               <button
                 key={x.key}
@@ -53,9 +56,10 @@ export function Guardrails() {
               </button>
             ))}
           </div>
-        </div>
-
-        <Stage tone="lime" className="mt-8">
+      }
+    >
+      <div ref={ref}>
+        <Stage tone="lime">
           <AnimatePresence mode="wait">
             <motion.div
               key={ind.key}

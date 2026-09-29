@@ -2,7 +2,8 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "motion/react";
-import { Card, Section } from "@/components/site/Section";
+import { Section } from "@/components/site/Section";
+import { Stage } from "@/components/site/Stage";
 import { Mark } from "@/components/brand/Mark";
 import { ease } from "@/lib/motion";
 
@@ -23,24 +24,34 @@ export function Loop() {
       eyebrow="How it works"
       title={<>One loop. Every call makes the next one better.</>}
     >
-      <div ref={ref} className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-        {cards.map((c, i) => (
-          <motion.div
-            key={c.t}
-            initial={{ opacity: 0, y: 20 }}
-            animate={on ? { opacity: 1, y: 0 } : undefined}
-            transition={{ duration: 0.7, ease: ease.out, delay: i * 0.1 }}
-          >
-            <Card className="flex h-full flex-col overflow-hidden">
-              <div className="relative m-2 h-[162px] rounded-[10.8px] bg-bone">{c.v}</div>
-              <div className="px-6 pb-6 pt-4">
-                <div className="t-label text-ink-3">{c.n}</div>
-                <h3 className="mt-2 text-[19.8px] font-[540] tracking-[-0.02em]">{c.t}</h3>
-                <p className="mt-2 text-[13.5px] leading-[1.5] text-ink-2">{c.d}</p>
-              </div>
-            </Card>
-          </motion.div>
-        ))}
+      <div ref={ref}>
+        <Stage tone="paper">
+          <div className="grid divide-line md:grid-cols-2 md:divide-x lg:grid-cols-4 [&>*]:border-line max-md:divide-y">
+            {cards.map((c, i) => (
+              <motion.div
+                key={c.t}
+                initial={{ opacity: 0, y: 16 }}
+                animate={on ? { opacity: 1, y: 0 } : undefined}
+                transition={{ duration: 0.7, ease: ease.out, delay: i * 0.12 }}
+                className="relative flex flex-col p-3 md:[&:nth-child(3)]:border-t lg:[&:nth-child(3)]:border-t-0 md:[&:nth-child(4)]:border-t lg:[&:nth-child(4)]:border-t-0"
+              >
+                <div className="relative h-[176px] rounded-[16px] bg-bone">{c.v}</div>
+                <div className="px-4 pb-5 pt-5">
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-mono text-[11.7px] text-ink-3">{c.n}</span>
+                    <h3 className="text-[21.6px] font-[540] tracking-[-0.022em]">{c.t}</h3>
+                  </div>
+                  <p className="mt-2 text-[14.4px] leading-[1.5] text-ink-2">{c.d}</p>
+                </div>
+                {i < cards.length - 1 && (
+                  <span className="absolute -right-[13px] top-[88px] z-10 hidden h-[26px] w-[26px] place-items-center rounded-[8px] bg-paper text-[13px] text-ink-3 ring-1 ring-line lg:grid" aria-hidden>
+                    →
+                  </span>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </Stage>
       </div>
     </Section>
   );

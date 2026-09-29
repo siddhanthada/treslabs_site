@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { Reveal } from "@/components/site/Reveal";
 import { Stage } from "@/components/site/Stage";
-import { Eyebrow } from "@/components/brand/Frame";
 import { Mark } from "@/components/brand/Mark";
 import { Draft } from "@/components/site/Draft";
 import { tryIt } from "@/content/site";
@@ -23,7 +21,7 @@ const SPOTS = [
   "lg:right-[3%] lg:bottom-[6%]",
 ];
 
-export function Try() {
+export function CallIt() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.3 });
   const reduce = useReducedMotion();
@@ -41,21 +39,13 @@ export function Try() {
   }, [inView, reduce]);
 
   return (
-    <section id="try" className="py-24 md:py-32">
-      <div className="wrap grid items-center gap-12 lg:grid-cols-12 lg:gap-12">
+    <div id="try" className="grid items-center gap-12 lg:grid-cols-12 lg:gap-12">
         {/* the line */}
         <div className="lg:col-span-5">
-          <Reveal>
-            <Eyebrow>Try it</Eyebrow>
-          </Reveal>
-          <Reveal as="h2" className="mt-5 max-w-[12ch] text-[clamp(30px,3.9vw,52px)] font-[540] leading-[1.02] tracking-[-0.038em]" delay={0.05}>
-            Don’t take our word for it. Call it.
-          </Reveal>
-          <Reveal as="p" className="mt-5 max-w-[26rem] text-[15.3px] leading-[1.5] text-ink-2" delay={0.1}>
+          <p className="max-w-[24rem] text-[17.1px] leading-[1.45] tracking-[-0.01em]">
             Our test agent answers a pretend company’s phone line. Ring it, and try to trip it up.
-          </Reveal>
-
-          <Reveal delay={0.15} className="mt-9">
+          </p>
+          <div className="mt-8">
             <div className="inline-flex rounded-[12px] border border-line bg-paper p-1" role="tablist" aria-label="Test lines">
               {tryIt.lines.map((l, j) => (
                 <button
@@ -153,7 +143,7 @@ export function Try() {
               )}
               {note && <p className="mt-2.5 text-[12.6px] text-lime-deep">{note}</p>}
             </div>
-          </Reveal>
+          </div>
         </div>
 
         {/* a call in progress */}
@@ -237,8 +227,7 @@ export function Try() {
             </div>
           </Stage>
         </div>
-      </div>
-    </section>
+    </div>
   );
 }
 

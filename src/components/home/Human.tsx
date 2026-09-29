@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "motion/react";
-import { Card, Section } from "@/components/site/Section";
+import { Card } from "@/components/site/Section";
 import { Pixel, PEOPLE } from "@/components/brand/Pixel";
 import { Phone } from "@/components/brand/Phone";
 import { ease } from "@/lib/motion";
@@ -30,16 +30,11 @@ const SIDES = [
   },
 ];
 
-export function Human() {
+export function BeforeAfter() {
   const ref = useRef<HTMLDivElement>(null);
   const on = useInView(ref, { amount: 0.3, once: true });
 
   return (
-    <Section
-      eyebrow="Before and after"
-      title="Behind every call is someone waiting for an answer."
-      sub="The same question, asked before and after one approved change."
-    >
       <div ref={ref} className="grid gap-4 md:grid-cols-2">
         {SIDES.map((s, i) => (
           <motion.div
@@ -103,6 +98,5 @@ export function Human() {
           </motion.div>
         ))}
       </div>
-    </Section>
   );
 }

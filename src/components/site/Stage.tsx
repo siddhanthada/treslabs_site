@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 const TONES = {
   lime: { bg: "bg-[#eef6d2]", dot: "rgba(86,114,10,.14)" },
   sand: { bg: "bg-[#ecebe4]", dot: "rgba(17,18,24,.07)" },
+  paper: { bg: "bg-paper ring-1 ring-line", dot: "rgba(17,18,24,.05)" },
   carbon: { bg: "bg-carbon text-on-carbon", dot: "rgba(255,255,255,.055)" },
 } as const;
 

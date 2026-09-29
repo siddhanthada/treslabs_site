@@ -8,6 +8,7 @@ import { Mark } from "@/components/brand/Mark";
 import { SpokenWords, plain, turnProgress } from "@/components/speech/Spoken";
 import { scenarios, type Scenario } from "@/content/scenarios";
 import { ease, fmtTime, mulberry32 } from "@/lib/motion";
+import { CallIt } from "./Try";
 
 /**
  * Hear it handle the hard ones. Pick a scenario; the call plays with a live
@@ -62,15 +63,39 @@ export function Scenarios() {
   useSpeech(sc, t, playing && sound, speed);
 
   const done = t >= sc.duration - 0.05;
+  const [mode, setMode] = useState<"listen" | "call">("listen");
 
   return (
     <Section
       id="hear"
-      eyebrow="Hear it handle the hard ones"
-      title="Pick a call. Watch what Treslabs does with it."
-      sub="Four real-world situations, from a slow carrier to a caller who wants a person."
+      eyebrow="Hear it, then call it"
+      title="Don’t take our word for it."
+      sub="Listen to four hard calls — or ring the test agent yourself."
+      aside={
+        <div className="inline-flex rounded-[12px] border border-line bg-paper p-1" role="tablist" aria-label="Listen or call">
+          {(["listen", "call"] as const).map((m) => (
+            <button
+              key={m}
+              role="tab"
+              aria-selected={mode === m}
+              onClick={() => {
+                setMode(m);
+                if (m === "call") setUserPlaying(false);
+              }}
+              className={`relative rounded-[9px] px-4 py-2 text-[13.05px] transition-colors ${mode === m ? "text-ink" : "text-ink-3 hover:text-ink"}`}
+            >
+              {mode === m && <motion.span layoutId="hear-mode" className="absolute inset-0 rounded-[9px] bg-sink" transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+              <span className="relative">{m === "listen" ? "Listen" : "Call it"}</span>
+            </button>
+          ))}
+        </div>
+      }
     >
       <div ref={ref}>
+        {mode === "call" ? (
+          <CallIt />
+        ) : (
+        <>
         {/* the scenarios */}
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           {scenarios.map((s, i) => {
@@ -255,6 +280,8 @@ export function Scenarios() {
             </div>
           </div>
         </Card>
+        </>
+        )}
       </div>
     </Section>
   );

@@ -5,6 +5,7 @@ import { motion, useInView, useReducedMotion } from "motion/react";
 import { Card, Section } from "@/components/site/Section";
 import { Mark } from "@/components/brand/Mark";
 import { ease } from "@/lib/motion";
+import { BeforeAfter } from "./Human";
 
 const STEP_MS = 1100;
 
@@ -41,7 +42,8 @@ export function FailureToFix() {
       id="improve"
       eyebrow="Improvement you can audit"
       title="One call fails. Here’s what happens next."
-      sub="The carrier’s system was slow, and the agent gave up. Treslabs turned that into a tested fix."
+      sub="The carrier’s system was slow, and the agent gave up. Treslabs turned that into a tested fix — and here’s what the caller heard next time."
+      align="split"
     >
       <div ref={ref} className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         {steps.map((s, i) => {
@@ -64,6 +66,17 @@ export function FailureToFix() {
             </motion.div>
           );
         })}
+      </div>
+
+      {/* the payoff: the same question, before and after the approved change */}
+      <div className="mt-16 md:mt-20">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <h3 className="max-w-[22ch] text-[clamp(22px,2.4vw,32px)] font-[540] leading-[1.1] tracking-[-0.028em]">
+            Behind every call is someone waiting for an answer.
+          </h3>
+          <p className="max-w-[22rem] text-[14.4px] leading-[1.5] text-ink-2">The same question, before and after one approved change.</p>
+        </div>
+        <BeforeAfter />
       </div>
     </Section>
   );
