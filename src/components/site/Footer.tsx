@@ -18,7 +18,7 @@ const cols = [
     l: [
       { t: "Manifesto", href: "/blog/todays-calls-are-tomorrows-tests" },
       { t: "Writing", href: "/blog" },
-      { t: "Design partners", href: "/#partners" },
+      { t: "Early access", href: "/#partners" },
       { t: "Careers", href: "#" },
       { t: "Contact", href: "mailto:hello@treslabs.ai" },
     ],
@@ -49,7 +49,7 @@ export function Footer() {
                   <span className="absolute inset-0 animate-ping rounded-full bg-lime/60" />
                   <span className="relative h-1.5 w-1.5 rounded-full bg-lime" />
                 </span>
-                Private beta · onboarding design partners
+                Private beta · taking on early customers
               </div>
             </div>
             {cols.map((c, i) => (

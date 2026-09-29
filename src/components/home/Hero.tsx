@@ -211,7 +211,7 @@ export function Hero() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
             <span className="inline-flex items-center gap-2.5 text-[12.15px] font-[480] text-ink-2">
               <span className="live-dot !h-1.5 !w-1.5" />
-              Private beta · now onboarding design partners
+              Private beta · now taking on early customers
             </span>
           </motion.div>
           <motion.h1
