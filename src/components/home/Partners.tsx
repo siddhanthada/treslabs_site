@@ -70,12 +70,8 @@ export function Partners() {
         <div className="lg:col-span-7">
           <Stage tone="sand">
             <div className="px-5 py-10 sm:px-10 md:py-12">
-              <div className="flex items-center justify-between">
-                <span className="t-label text-ink-3">First call to live</span>
-                <Draft />
-              </div>
-              {/* the climb */}
-              <ol className="relative mt-8 grid gap-3 md:block md:h-[400px]">
+              {/* the climb: each step 76px above the last, and the box ends at the top card */}
+              <ol className="relative grid gap-3 md:block md:h-[366px]">
                 {pathToLive.map((s, i) => {
                   const last = i === pathToLive.length - 1;
                   return (
@@ -86,7 +82,7 @@ export function Partners() {
                       viewport={{ once: true, amount: 0.4 }}
                       transition={{ duration: 0.55, ease: ease.out, delay: 0.1 + i * 0.14 }}
                       className="md:absolute md:w-[44%]"
-                      style={{ left: `${i * 14}%`, bottom: `${i * 19}%` }}
+                      style={{ left: `${i * 14}%`, bottom: i * 76 }}
                     >
                       <div
                         className={`flex items-center gap-3.5 rounded-[16px] p-4 ${
