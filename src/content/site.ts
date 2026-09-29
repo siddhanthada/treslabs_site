@@ -114,7 +114,7 @@ export const industries: Industry[] = [
 ];
 
 /** Categories, not brands: we connect over APIs; named partners come later. */
-export const systems = ["CRM", "Helpdesk", "Orders", "Payments", "Bookings", "Logistics", "Identity", "Knowledge base", "Telephony · SIP", "Your own APIs"];
+export const systems = ["CRM", "Help desk", "Orders", "Payments", "Bookings", "Delivery", "Identity", "Knowledge base", "Phone lines", "Your own systems"];
 
 /* ─── When AI goes wrong ──────────────────────────────────────────────── */
 
@@ -203,7 +203,7 @@ export const pathToLive = [
 export const faq = [
   {
     q: "Is Treslabs live?",
-    a: "We’re in private beta. The platform runs every week on our test harness against real phone calls, and we’re onboarding a small group of design partners before launch.",
+    a: "We’re in private beta. Every new version is tested on real phone calls each week, and we’re onboarding a small group of design partners before launch.",
   },
   {
     q: "What does a design partner commit to?",
@@ -215,11 +215,11 @@ export const faq = [
   },
   {
     q: "How do you evaluate every call?",
-    a: "Each call is checked the moment it ends — resolution, policy, verification, interruptions, tool failures, latency and whether a handover was right. Failures are grouped by cause.",
+    a: "The moment a call ends, it’s checked: was the problem solved, were the rules followed, was the caller verified, did the agent talk over them, did anything stall, and was a handover right. Problems are grouped by cause.",
   },
   {
     q: "How does the agent change over time?",
-    a: "Failures become proposed changes. Each one is replayed against real past calls and a regression set, then a person approves it before a new version ships.",
+    a: "Problems become proposed fixes. Each fix is tried on your real past calls — including the ones that already went well — and a person approves it before it goes live.",
   },
   {
     q: "What happens when something goes wrong?",
@@ -227,7 +227,7 @@ export const faq = [
   },
   {
     q: "Which systems can it work with?",
-    a: "Anything with an API — CRM, orders, bookings, payments, logistics, helpdesks and your own services — plus SIP for telephony. Each action is granted explicitly.",
+    a: "The tools you already run — CRM, orders, bookings, payments, delivery tracking, your help desk and your own systems — and your existing phone lines. You choose exactly what it’s allowed to do in each.",
   },
   {
     q: "Where is our data kept?",

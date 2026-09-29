@@ -52,7 +52,7 @@ export function Try() {
             Don’t take our word for it. Call it.
           </Reveal>
           <Reveal as="p" className="mt-5 max-w-[26rem] text-[15.3px] leading-[1.5] text-ink-2" delay={0.1}>
-            A test agent on our harness answers a fictional line. Try to break it.
+            Our test agent answers a pretend company’s phone line. Ring it, and try to trip it up.
           </Reveal>
 
           <Reveal delay={0.15} className="mt-9">
@@ -177,19 +177,18 @@ export function Try() {
                     {String(Math.floor(sec / 60)).padStart(2, "0")}:{String(sec % 60).padStart(2, "0")}
                   </span>
                 </div>
-                <div className="relative mx-auto mt-6 grid h-[88px] w-[88px] place-items-center">
+                {/* the call: the mark on its own, with ripples — never a circle around the logo */}
+                <div className="relative mx-auto mt-7 grid h-[96px] w-[96px] place-items-center">
                   {!reduce &&
-                    [0, 1].map((r) => (
+                    [0, 1, 2].map((r) => (
                       <motion.span
                         key={r}
-                        className="absolute inset-0 rounded-full border border-lime-deep/30"
-                        animate={{ scale: [1, 1.55], opacity: [0.6, 0] }}
-                        transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: r * 1.2 }}
+                        className="absolute inset-[18px] rounded-[30%] border border-lime-deep/40"
+                        animate={{ scale: [1, 2.1], opacity: [0.7, 0] }}
+                        transition={{ duration: 2.8, repeat: Infinity, ease: [0.22, 1, 0.36, 1], delay: r * 0.93 }}
                       />
                     ))}
-                  <span className="grid h-[88px] w-[88px] place-items-center rounded-full bg-ink">
-                    <Mark centered spinning={false} className="h-9 w-9 text-lime" trail={false} title="" />
-                  </span>
+                  <Mark centered spinning={false} className="relative h-11 w-11 text-ink" trail={false} title="" />
                 </div>
                 <div className="mt-5 text-[15.3px] font-[540]">Treslabs test agent</div>
                 <div className="mt-0.5 text-[12.6px] text-ink-3">{line.name} · listening</div>

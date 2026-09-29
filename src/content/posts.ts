@@ -232,7 +232,7 @@ export const posts: Post[] = [
   {
     slug: "what-test-calls-taught-us-about-silence",
     title: "What our test calls taught us about silence",
-    dek: "Callers forgive a lot. They don’t forgive four seconds of nothing. Notes from the harness on latency, turn-taking and what ‘fast enough’ means.",
+    dek: "Callers forgive a lot. They don’t forgive four seconds of nothing. Notes from our test calls on pauses, interruptions and what ‘fast enough’ feels like.",
     category: "Engineering",
     date: "2026-08-25",
     minutes: 4,
@@ -241,7 +241,7 @@ export const posts: Post[] = [
     body: [
       {
         type: "p",
-        text: "Our harness places real phone calls against every build. The single strongest predictor of a caller giving up wasn’t a wrong answer. It was silence while a system was slow.",
+        text: "We put every new version through real phone calls before anyone else hears it. The single strongest predictor of a caller giving up wasn’t a wrong answer. It was silence while a system was slow.",
       },
       { type: "h2", text: "Fill the gap honestly", id: "gap" },
       {
