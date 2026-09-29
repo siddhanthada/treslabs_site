@@ -521,119 +521,150 @@ function Drop({
   );
 }
 
-/* ── The live call trace ─────────────────────────────────────────────────
-   The same call as the hero, drawn the way engineers read a request: lanes for
-   who spoke and what Treslabs did in each system, a playhead, and the checks
-   landing at the end. Evidence, not a flowchart. */
+/* ── The live call, as Treslabs shows it ───────────────────────────────────
+   Not a diagram: a crisp piece of the product. The same call as the hero, in
+   a call-detail window — the transcript as it's spoken, what Treslabs does in
+   each system (working → done, with timings), and the checks it's scored on. */
 
-const DOM = 8.4; // seconds of the loop shown on the trace
-const at = (v: number) => `${(Math.min(v, DOM) / DOM) * 100}%`;
-const span = (a: number, b: number) => `${((Math.min(b, DOM) - a) / DOM) * 100}%`;
+const MS = [120, 340, 280, 90]; // how long each system took (illustrative)
+const CHECKS = ["Resolved", "Policy followed", "Caller verified", "No talking over", "Answered in time", "Right handover"];
 
 function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
-  const head = Math.min(t, DOM);
-  const working = t > T.think[0] && t < T.outcome;
-  const state = t < T.think[0] ? "Listening" : t < T.outcome ? "Working" : "Resolved";
-  const talk: { a: number; b: number; who: "caller" | "agent" }[] = [
-    { a: T.caller, b: 2.1, who: "caller" },
-    { a: T.agent, b: 4.1, who: "agent" },
-    { a: T.reply, b: 6, who: "caller" },
-  ];
-  const acts = scene.systems.map(([k, v], i) => ({ k, v, a: T.systems[i], b: T.systems[i] + (i === 3 ? 0.9 : 0.7) }));
-  const grow = (a: number, b: number) => Math.max(0, Math.min(1, (head - a) / (b - a)));
+  const ended = t >= T.ends;
+  const lines = [
+    { at: T.caller, who: "caller" as const, text: scene.lines[0] },
+    { at: T.agent, who: "agent" as const, text: scene.lines[1] },
+    { at: T.reply, who: "caller" as const, text: scene.lines[2] },
+  ].filter((l) => t >= l.at);
+  const secs = Math.floor(Math.min(t, T.ends) * 4.4);
 
   return (
-    <section aria-label="The live call, traced" className="pb-[clamp(40px,6vw,88px)]">
+    <section aria-label="The live call, as Treslabs shows it" className="pb-[clamp(40px,6vw,96px)]">
       <div className="wrap">
-        <div className="mx-auto max-w-[1040px] rounded-[20px] bg-paper px-5 pb-5 pt-4 shadow-[0_30px_70px_-50px_rgba(17,18,24,.3)] ring-1 ring-line sm:px-7">
-          {/* header */}
-          <div className="flex items-center justify-between gap-4 pb-3">
-            <div className="flex items-center gap-2.5 text-[13.5px] font-[540]">
-              <Mark centered spinning={working} maxSpeed={11} className="h-3.5 w-3.5 text-ink" trail={false} title="" />
-              The call, traced
+        <div className="mx-auto max-w-[1100px] overflow-hidden rounded-[22px] bg-paper shadow-[0_50px_100px_-60px_rgba(17,18,24,.45),0_2px_6px_-2px_rgba(17,18,24,.06)] ring-1 ring-ink/[0.07]">
+          {/* window header */}
+          <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3.5">
+            <div className="flex min-w-0 items-center gap-2.5 text-[13.05px]">
+              <Mark centered className="h-4 w-4 shrink-0 text-ink" trail={false} title="" />
+              <span className="text-ink-3">Calls</span>
+              <span className="text-line-2">/</span>
+              <span className="truncate font-[540]">Harrow &amp; Finch · customer line</span>
+              <span className="hidden font-mono text-[11.7px] text-ink-3 sm:inline">#{44812 + (loop % 5) * 37}</span>
             </div>
-            <div className="flex items-center gap-5 text-[12.15px] text-ink-3">
-              <span className="hidden items-center gap-1.5 sm:flex">
-                <span className="h-[5px] w-3 rounded-full bg-ink" /> Caller
+            <div className="flex items-center gap-2">
+              <span
+                className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-[8px] px-2.5 py-1 text-[12.15px] transition-colors duration-300 ${
+                  ended ? "bg-sink text-ink-2" : "bg-lime text-ink"
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${ended ? "bg-lime-deep" : "bg-ink"}`} />
+                {ended ? "Ended · evaluated" : `Live · 0:${String(secs).padStart(2, "0")}`}
               </span>
-              <span className="hidden items-center gap-1.5 sm:flex">
-                <span className="h-[5px] w-3 rounded-full bg-[#9bbd28]" /> Agent
-              </span>
-              <span className="flex items-center gap-1.5 text-ink">
-                <span className={`h-1.5 w-1.5 rounded-full ${state === "Resolved" ? "bg-lime-deep" : "bg-ink-3"}`} />
-                {state}
-              </span>
+              <span className="hidden rounded-[8px] bg-sink px-2 py-1 font-mono text-[11.25px] text-ink-2 sm:inline">v15</span>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <div className="relative min-w-[600px]">
-              {/* rows */}
-              <Row k="Conversation">
-                {talk.map((b, n) => (
-                  <Bar key={n} a={b.a} b={b.b} g={grow(b.a, b.b)} className={b.who === "caller" ? "bg-ink" : "bg-[#9bbd28]"} />
-                ))}
-              </Row>
-              {acts.map((x) => (
-                <Row key={x.k} k={x.k}>
-                  <Bar a={x.a} b={x.b} g={grow(x.a, x.b)} className="bg-lime-deep" />
-                  <span
-                    className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap pl-3 text-[12.6px] text-ink-2 transition-opacity duration-300 ${head >= x.b ? "opacity-100" : "opacity-0"}`}
-                    style={{ left: at(x.b) }}
-                  >
-                    {x.v}
-                  </span>
-                </Row>
-              ))}
-              <Row k="Outcome" last>
-                <span
-                  className={`absolute top-1/2 flex -translate-y-1/2 items-center gap-3 whitespace-nowrap transition-all duration-500 ${
-                    t >= T.outcome ? "translate-x-0 opacity-100" : "-translate-x-1 opacity-0"
-                  }`}
-                  style={{ left: at(T.outcome) }}
-                >
-                  <span className="rounded-[7px] bg-lime px-2 py-0.5 text-[12.15px] font-[540] text-ink">{scene.outcome[0]}</span>
-                  <span className="flex gap-1">
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <span
-                        key={`${loop}-${i}`}
-                        className={`h-[9px] w-[9px] rounded-[2.5px] transition-colors duration-200 ${t >= T.evaluate + i * 0.09 ? "bg-lime-deep" : "bg-line-2"}`}
-                      />
-                    ))}
-                  </span>
-                </span>
-              </Row>
+          <div className="grid lg:grid-cols-12">
+            {/* transcript */}
+            <div className="border-b border-line p-5 lg:col-span-5 lg:border-b-0 lg:border-r">
+              <div className="text-[12.15px] text-ink-3">Transcript</div>
+              <ul className="mt-4 flex min-h-[210px] flex-col gap-3">
+                <AnimatePresence initial={false}>
+                  {lines.map((l) => (
+                    <motion.li
+                      key={`${loop}-${l.at}`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.45, ease: ease.out }}
+                      className={`max-w-[92%] rounded-[14px] px-4 py-2.5 ${
+                        l.who === "caller" ? "self-start rounded-tl-[5px] bg-bone" : "self-end rounded-tr-[5px] bg-ink text-bone"
+                      }`}
+                    >
+                      {l.who === "caller" ? (
+                        <p className="speech-caller text-[17.1px] leading-[1.22]">“{l.text}”</p>
+                      ) : (
+                        <p className="text-[13.5px] leading-[1.45]">{l.text}</p>
+                      )}
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
+            </div>
 
-              {/* playhead */}
-              <div className="pointer-events-none absolute inset-y-0 left-[124px] right-0">
-                <span
-                  className="absolute inset-y-0 w-px bg-lime-deep/70 transition-[left] duration-100 ease-linear"
-                  style={{ left: at(head), opacity: t >= DOM - 0.05 ? 0 : 1 }}
-                  aria-hidden
-                />
+            {/* what Treslabs did */}
+            <div className="border-b border-line p-5 lg:col-span-4 lg:border-b-0 lg:border-r">
+              <div className="text-[12.15px] text-ink-3">Actions</div>
+              <ul className="mt-4 grid gap-1">
+                {scene.systems.map(([k, v], i) => {
+                  const start = T.systems[i];
+                  const state = t < start ? "waiting" : t < start + 0.45 ? "working" : "done";
+                  return (
+                    <li key={k} className={`flex items-center gap-3 rounded-[12px] px-2 py-2 transition-colors duration-300 ${state === "working" ? "bg-bone" : ""}`}>
+                      <span
+                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-[9px] text-[12.6px] font-[540] transition-colors duration-300 ${
+                          state === "waiting" ? "bg-sink text-ink-3" : "bg-ink text-bone"
+                        }`}
+                      >
+                        {k[0]}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block truncate text-[13.5px] ${state === "waiting" ? "text-ink-3" : "text-ink"}`}>{k}</span>
+                        <span className={`block truncate text-[12.15px] transition-opacity duration-300 ${state === "done" ? "text-ink-2 opacity-100" : "opacity-0"}`}>
+                          {v}
+                        </span>
+                      </span>
+                      <span className="flex w-16 shrink-0 items-center justify-end gap-2">
+                        {state === "done" && <span className="font-mono text-[10.8px] text-ink-3">{MS[i]}ms</span>}
+                        {state === "working" ? (
+                          <Mark centered spinning maxSpeed={14} className="h-4 w-4 text-ink" trail={false} title="" />
+                        ) : state === "done" ? (
+                          <span className="grid h-[18px] w-[18px] place-items-center rounded-[5px] bg-lime">
+                            <Check className="h-3 w-3" />
+                          </span>
+                        ) : (
+                          <span className="h-[18px] w-[18px] rounded-[5px] border border-dashed border-line-2" />
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {/* evaluation */}
+            <div className="flex flex-col p-5 lg:col-span-3">
+              <div className="text-[12.15px] text-ink-3">Evaluation</div>
+              <ul className="mt-4 grid gap-2.5">
+                {CHECKS.map((c, i) => {
+                  const on = t >= T.evaluate + i * 0.12;
+                  return (
+                    <li key={c} className="flex items-center justify-between gap-3 text-[13.05px]">
+                      <span className={`transition-colors duration-300 ${on ? "text-ink" : "text-ink-3"}`}>{c}</span>
+                      <span
+                        className={`grid h-[18px] w-[18px] place-items-center rounded-[5px] transition-all duration-300 ${
+                          on ? "scale-100 bg-lime ring-1 ring-lime-deep/40" : "scale-90 bg-sink"
+                        }`}
+                      >
+                        {on && <Check className="h-3 w-3" />}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div
+                className={`mt-5 rounded-[14px] p-4 transition-all duration-500 ${
+                  t >= T.outcome ? "translate-y-0 bg-ink text-bone opacity-100" : "translate-y-1 bg-sink opacity-0"
+                }`}
+              >
+                <div className="text-[11.7px] text-on-carbon-3">Outcome</div>
+                <div className="mt-1 text-[16.2px] font-[540] tracking-[-0.01em]">{scene.outcome[0]}</div>
+                <div className="mt-0.5 text-[12.15px] text-on-carbon-2">{scene.outcome[1]}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function Row({ k, last, children }: { k: string; last?: boolean; children: ReactNode }) {
-  return (
-    <div className={`grid grid-cols-[124px_1fr] items-center ${last ? "" : "border-b border-line/70"}`}>
-      <span className="truncate py-3 text-[12.6px] text-ink-3">{k}</span>
-      <div className="relative h-[40px]">{children}</div>
-    </div>
-  );
-}
-
-function Bar({ a, b, g, className }: { a: number; b: number; g: number; className: string }) {
-  return (
-    <span className="absolute top-1/2 h-[6px] -translate-y-1/2" style={{ left: at(a), width: span(a, b) }}>
-      <span className={`block h-full rounded-full transition-[width] duration-100 ease-linear ${className}`} style={{ width: `${g * 100}%`, opacity: g > 0 ? 1 : 0 }} />
-    </span>
   );
 }
 
