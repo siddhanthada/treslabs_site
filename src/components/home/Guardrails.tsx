@@ -2,18 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { Card, Section } from "@/components/site/Section";
+import { Section } from "@/components/site/Section";
+import { Stage, VoicePill } from "@/components/site/Stage";
 import { Mark } from "@/components/brand/Mark";
-import { industries, systems } from "@/content/site";
+import { industries } from "@/content/site";
 import { ease } from "@/lib/motion";
 
 /*
-  Goals and guardrails first, explicit procedures where they matter. One agent
-  definition per industry, beside the moment its guardrail does its job:
-  the agent does the work, and knows where to stop.
+  Goals and guardrails first. On one stage: the agent's definition as a quiet
+  config card, and — beside it — the moment a guardrail does its job on a call.
 */
 
-const ROTATE_MS = 7000;
+const ROTATE_MS = 8000;
 
 export function Guardrails() {
   const ref = useRef<HTMLDivElement>(null);
@@ -30,206 +30,172 @@ export function Guardrails() {
   }, [i, inView, reduce, auto]);
 
   return (
-    <Section
-      id="guardrails"
-      eyebrow="Goals and guardrails"
-      title="Tell it what to achieve. And where to stop."
-      sub="No giant flowcharts. Set the goal, grant the actions, draw the limits — and spell out steps only where the order matters."
-    >
+    <Section id="guardrails" eyebrow="Goals and guardrails" title="Tell it what to achieve. And where to stop." sub="No flowcharts. A goal, the actions it may take, and the lines it won’t cross.">
       <div ref={ref}>
-        <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="Industries">
-          {industries.map((x, j) => (
-            <button
-              key={x.key}
-              role="tab"
-              aria-selected={i === j}
-              onClick={() => {
-                setI(j);
-                setAuto(false);
-              }}
-              className={`relative overflow-hidden rounded-[9px] px-4 py-2 text-[12.6px] transition-colors ${
-                i === j ? "bg-ink text-bone" : "bg-sink text-ink-2 hover:text-ink"
-              }`}
-            >
-              {x.name}
-              {i === j && auto && !reduce && (
-                <motion.span
-                  key={`${x.key}-bar`}
-                  className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-lime"
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: inView ? 1 : 0 }}
-                  transition={{ duration: ROTATE_MS / 1000, ease: "linear" }}
-                />
-              )}
-            </button>
-          ))}
+        {/* industry switcher: a quiet segmented control */}
+        <div className="flex justify-center">
+          <div className="inline-flex rounded-[12px] border border-line bg-paper p-1" role="tablist" aria-label="Industries">
+            {industries.map((x, j) => (
+              <button
+                key={x.key}
+                role="tab"
+                aria-selected={i === j}
+                onClick={() => {
+                  setI(j);
+                  setAuto(false);
+                }}
+                className={`relative rounded-[9px] px-3.5 py-1.5 text-[12.6px] transition-colors sm:px-4 ${i === j ? "text-ink" : "text-ink-3 hover:text-ink"}`}
+              >
+                {i === j && (
+                  <motion.span layoutId="ind-pill" className="absolute inset-0 rounded-[9px] bg-sink" transition={{ type: "spring", stiffness: 420, damping: 36 }} />
+                )}
+                <span className="relative">{x.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={ind.key}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.45, ease: ease.out }}
-            className="mt-8 grid gap-4 lg:grid-cols-12"
-          >
-            {/* the agent definition */}
-            <Card className="lg:col-span-7">
-              <div className="flex items-center justify-between gap-4 border-b border-line px-6 py-4">
-                <div className="flex items-center gap-2.5">
-                  <Mark centered className="h-4 w-4 text-ink" trail={false} title="" />
-                  <span className="text-[13.5px] font-[540]">{ind.name} agent</span>
-                  <span className="rounded-[5.4px] bg-sink px-1.5 py-0.5 font-mono text-[10.35px] text-ink-2">v15 live</span>
+        <Stage tone="lime" className="mt-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={ind.key}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid items-center gap-10 px-5 py-10 sm:px-10 md:py-14 lg:grid-cols-12 lg:gap-8 lg:px-14"
+            >
+              {/* the definition */}
+              <motion.div
+                initial={reduce ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, ease: ease.out }}
+                className="rounded-[18px] bg-paper p-2 shadow-[0_30px_60px_-34px_rgba(40,52,10,.45)] lg:col-span-6"
+              >
+                <div className="flex items-center justify-between px-4 pb-3 pt-3">
+                  <span className="flex items-center gap-2.5 text-[13.5px] font-[540]">
+                    <Mark centered className="h-4 w-4 text-ink" trail={false} title="" />
+                    {ind.name} agent
+                  </span>
+                  <span className="rounded-[7px] bg-lime px-2 py-0.5 font-mono text-[10.8px] text-ink">v15 live</span>
                 </div>
-                <span className="t-label hidden text-ink-3 sm:block">{ind.line}</span>
-              </div>
-
-              <dl className="divide-y divide-line">
-                <Row k="Goal">
-                  <p className="text-[14.4px] leading-[1.45]">{ind.goal}</p>
-                </Row>
-                <Row k="Can">
-                  <ul className="grid gap-1.5 sm:grid-cols-2">
-                    {ind.can.map((c) => (
-                      <li key={c.system} className="flex items-start gap-2 text-[13.05px] leading-[1.4]">
-                        <Tick />
-                        <span>
-                          <span className="font-[540]">{c.system}</span>
-                          <span className="text-ink-2"> · {c.action}</span>
+                <div className="grid gap-1.5">
+                  <Field k="Goal">
+                    <p className="text-[14.4px] leading-[1.4]">{ind.goal}</p>
+                  </Field>
+                  <Field k="Can use">
+                    <div className="flex flex-wrap gap-1.5">
+                      {ind.can.map((c) => (
+                        <span key={c.system} className="inline-flex items-center gap-1.5 rounded-[8px] border border-line bg-paper px-2.5 py-1 text-[12.6px]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-lime-deep" />
+                          {c.system}
                         </span>
-                      </li>
-                    ))}
-                  </ul>
-                </Row>
-                <Row k="Never">
-                  <ul className="flex flex-wrap gap-1.5">
-                    {ind.never.map((n) => (
-                      <li key={n} className="flex items-center gap-1.5 rounded-[7.2px] bg-fault-tint/60 px-2.5 py-1 text-[12.6px] text-[#8f3a1d]">
-                        <Cross />
-                        {n}
-                      </li>
-                    ))}
-                  </ul>
-                </Row>
-                <Row k="Hands over">
-                  <p className="text-[13.05px] leading-[1.45] text-ink-2">{ind.handover}</p>
-                </Row>
-                {ind.procedure && (
-                  <Row k="Procedure">
-                    <div className="t-label mb-2 text-ink-3">{ind.procedure.name}</div>
-                    <ol className="flex flex-wrap items-center gap-1.5">
-                      {ind.procedure.steps.map((s, n) => (
-                        <li key={s} className="flex items-center gap-1.5">
-                          <span className="flex items-center gap-1.5 rounded-[7.2px] border border-line bg-bone px-2 py-1 text-[12.15px]">
-                            <span className="font-mono text-[10.35px] text-ink-3">{n + 1}</span>
-                            {s}
-                          </span>
-                          {n < ind.procedure!.steps.length - 1 && <span className="text-ink-3">→</span>}
-                        </li>
                       ))}
-                    </ol>
-                  </Row>
-                )}
-              </dl>
-            </Card>
+                    </div>
+                  </Field>
+                  <Field k="Never">
+                    <div className="flex flex-wrap gap-1.5">
+                      {ind.never.map((n) => (
+                        <span key={n} className="inline-flex items-center gap-1.5 rounded-[8px] bg-fault-tint/70 px-2.5 py-1 text-[12.6px] text-[#8f3a1d]">
+                          <X />
+                          {n}
+                        </span>
+                      ))}
+                    </div>
+                  </Field>
+                  {ind.procedure ? (
+                    <Field k="In order">
+                      <div className="flex flex-wrap items-center gap-1 text-[12.6px] text-ink-2">
+                        {ind.procedure.steps.map((s, n) => (
+                          <span key={s} className="inline-flex items-center gap-1">
+                            <span className="rounded-[7px] bg-paper px-2 py-0.5 ring-1 ring-line">{s}</span>
+                            {n < ind.procedure!.steps.length - 1 && <span className="text-ink-3">›</span>}
+                          </span>
+                        ))}
+                      </div>
+                    </Field>
+                  ) : (
+                    <Field k="Hands over">
+                      <p className="text-[13.05px] leading-[1.45] text-ink-2">{ind.handover}</p>
+                    </Field>
+                  )}
+                </div>
+              </motion.div>
 
-            {/* the moment a guardrail does its job */}
-            <Card className="flex flex-col p-6 lg:col-span-5">
-              <div className="t-label text-ink-3">A guardrail at work</div>
-              <div className="mt-6 flex flex-col gap-3">
-                <Step delay={0.15}>
-                  <div className="rounded-[10px] bg-bone px-4 py-3 shadow-[0_8px_24px_-16px_rgba(17,18,24,.35)]">
-                    <p className="speech-caller text-[18px] leading-[1.2]">{ind.moment.caller}</p>
+              {/* the moment it matters */}
+              <div className="relative flex flex-col items-start gap-3.5 lg:col-span-6 lg:pl-6">
+                <Float delay={0.15}>
+                  <VoicePill name={ind.caller} role="On the line" initial={ind.caller[0]} />
+                </Float>
+                <Float delay={0.45} className="self-stretch sm:ml-8">
+                  <div className="rounded-[16px] rounded-tl-[6px] bg-paper px-5 py-4 shadow-[0_20px_40px_-28px_rgba(40,52,10,.5)]">
+                    <p className="speech-caller text-[clamp(19px,1.8vw,24px)] leading-[1.18]">{ind.moment.caller}</p>
                   </div>
-                </Step>
-                <Step delay={0.75}>
-                  <div className="flex items-center gap-2.5 rounded-[10px] border border-fault/30 bg-fault-tint/40 px-4 py-3 text-[13.05px] text-[#8f3a1d]">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-[5px] bg-fault text-bone">
-                      <Cross />
+                </Float>
+                <Float delay={0.95} className="sm:ml-16">
+                  <div className="inline-flex items-center gap-2.5 rounded-[12px] border border-fault/25 bg-[#fbeee8] px-3.5 py-2.5 text-[13.05px] text-[#8f3a1d]">
+                    <span className="grid h-5 w-5 place-items-center rounded-[6px] bg-fault text-bone">
+                      <X />
                     </span>
                     <span>
-                      <span className="font-[540]">Stopped · </span>
-                      {ind.moment.stop}
+                      <span className="font-[540]">Guardrail</span> · {ind.moment.stop}
                     </span>
                   </div>
-                </Step>
-                <Step delay={1.35}>
-                  <div className="flex items-center gap-2.5 rounded-[10px] bg-ink px-4 py-3 text-[13.05px] text-bone">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-[5px] bg-lime text-ink">
-                      <Tick />
-                    </span>
-                    {ind.moment.then}
+                </Float>
+                <Float delay={1.45} className="self-stretch sm:ml-8">
+                  <div className="flex items-start gap-3 rounded-[16px] rounded-tr-[6px] bg-ink px-5 py-4 text-bone">
+                    <Mark centered className="mt-0.5 h-4 w-4 shrink-0 text-lime" trail={false} title="" />
+                    <p className="text-[14.4px] leading-[1.45]">{ind.moment.then}</p>
                   </div>
-                </Step>
+                </Float>
               </div>
-              <Step delay={1.9}>
-                <div className="mt-3 rounded-[10px] border border-dashed border-line-2 p-4">
-                  <div className="t-label text-ink-3">Passed to a person</div>
-                  <ul className="mt-2.5 grid gap-1.5 font-mono text-[11.7px] leading-[1.45] text-ink-2">
-                    <li>✓ Caller verified</li>
-                    <li>✓ Reason · {ind.moment.stop.toLowerCase()}</li>
-                    <li>✓ Full transcript and context attached</li>
-                  </ul>
-                </div>
-              </Step>
-              <p className="mt-auto border-t border-line pt-4 text-[12.6px] leading-[1.5] text-ink-2">
-                It does the work. And it knows where to stop.
-              </p>
-            </Card>
-          </motion.div>
-        </AnimatePresence>
+            </motion.div>
+          </AnimatePresence>
 
-        {/* the systems it acts in */}
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <div className="t-label text-ink-3">Acts in your systems, over APIs</div>
-          <ul className="flex max-w-[860px] flex-wrap justify-center gap-2">
-            {systems.map((s) => (
-              <li key={s} className="rounded-[9px] border border-line bg-paper px-3.5 py-2 text-[12.6px] text-ink-2">
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
+          {auto && !reduce && (
+            <div className="absolute inset-x-0 bottom-0 h-[3px] bg-lime-deep/10">
+              <motion.div
+                key={`${ind.key}-${inView}`}
+                className="h-full origin-left bg-lime-deep/50"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: inView ? 1 : 0 }}
+                transition={{ duration: ROTATE_MS / 1000, ease: "linear" }}
+              />
+            </div>
+          )}
+        </Stage>
       </div>
     </Section>
   );
 }
 
-function Row({ k, children }: { k: string; children: React.ReactNode }) {
+function Field({ k, children }: { k: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-2 px-6 py-4 sm:grid-cols-[110px_1fr] sm:gap-6">
-      <dt className="t-label pt-0.5 text-ink-3">{k}</dt>
-      <dd>{children}</dd>
+    <div className="rounded-[12px] bg-bone px-4 py-3">
+      <div className="t-label mb-1.5 text-ink-3">{k}</div>
+      {children}
     </div>
   );
 }
 
-function Step({ delay, children }: { delay: number; children: React.ReactNode }) {
+function Float({ delay, className = "", children }: { delay: number; className?: string; children: React.ReactNode }) {
   const reduce = useReducedMotion();
   return (
     <motion.div
-      initial={reduce ? false : { opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: ease.out, delay }}
+      initial={reduce ? false : { opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.55, ease: ease.out, delay }}
+      className={className}
     >
       {children}
     </motion.div>
   );
 }
 
-function Tick() {
-  return (
-    <svg viewBox="0 0 16 16" className="mt-[3px] h-3 w-3 shrink-0 text-lime-deep" aria-hidden>
-      <path d="M3.5 8.4 6.6 11.4 12.5 5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function Cross() {
+function X() {
   return (
     <svg viewBox="0 0 16 16" className="h-2.5 w-2.5 shrink-0" aria-hidden>
-      <path d="M5 5l6 6M11 5l-6 6" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M5 5l6 6M11 5l-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

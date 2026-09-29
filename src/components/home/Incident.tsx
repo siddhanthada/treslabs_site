@@ -2,193 +2,219 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { Card, Section } from "@/components/site/Section";
+import { Section } from "@/components/site/Section";
+import { Stage } from "@/components/site/Stage";
 import { Mark } from "@/components/brand/Mark";
-import { incident } from "@/content/site";
 import { ease } from "@/lib/motion";
 
 /*
-  "What happens in the two hours after something goes wrong?" — told as the log
-  it leaves behind. A new version rolls out, evaluation catches a policy error,
-  the rollout pauses itself, v15 (still warm) takes back every call, affected
-  customers are corrected, and the fix is replayed before it tries again.
+  "What happens in the two hours after something goes wrong?" — as one chart.
+  A cursor sweeps a Tuesday afternoon: v16 rolls out, policy errors cross the
+  limit, the rollout pauses itself, v15 takes every call back, customers are
+  corrected, and the fix is replayed before it tries again.
 */
 
-const STEP_MS = 1150;
-const LIMIT = 5; // policy-error limit, %
+const W = 1000;
+const H = 250;
+const PAD = { l: 44, r: 28, t: 24, b: 36 };
+const LIMIT = 5;
+const MAX = 20;
+
+// time (minutes after 14:00) → x, with a break between 14:25 and 16:40
+const x = (m: number) => {
+  const iw = W - PAD.l - PAD.r;
+  return m <= 25 ? PAD.l + (m / 25) * iw * 0.8 : PAD.l + iw * 0.86 + ((m - 160) / 10) * iw * 0.14;
+};
+const y = (v: number) => PAD.t + (1 - v / MAX) * (H - PAD.t - PAD.b);
+
+const EVENTS = [
+  { m: 0, t: "14:00", label: "v16 rolls out to 10%", state: "rolling out" },
+  { m: 7, t: "14:07", label: "Errors cross 5% · paused itself", state: "paused itself", fault: true },
+  { m: 12, t: "14:12", label: "Rolled back to v15", state: "rolled back to v15" },
+  { m: 20, t: "14:20", label: "6 customers corrected", state: "customers corrected" },
+  { m: 165, t: "16:45", label: "Fix replayed on 1,279 calls", state: "fixed · back in review" },
+];
+
+// policy-error rate on v16, and share of calls on v16
+const ERR: [number, number][] = [
+  [0, 0.4], [2, 1.1], [4, 3.2], [6, 9.8], [7, 14.6], [9, 14.2], [11.6, 13.8], [12, 0], [25, 0],
+];
+const TRAFFIC: [number, number][] = [[0, 10], [12, 10], [12.01, 0], [25, 0]];
+const path = (pts: [number, number][]) => pts.map(([m, v], i) => `${i ? "L" : "M"}${x(m).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+
+const DURATION = 7; // seconds for the sweep
 
 export function Incident() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { amount: 0.35, once: true });
+  const inView = useInView(ref, { amount: 0.4, once: true });
   const reduce = useReducedMotion();
-  const [n, setN] = useState(0);
+  const [sweep, setP] = useState(0); // 0..1 sweep
   const [run, setRun] = useState(0);
-  const shown = reduce ? incident.length : n;
 
   useEffect(() => {
     if (!inView || reduce) return;
-    let i = 0;
-    let id = 0;
-    const step = () => {
-      i += 1;
-      setN(i);
-      if (i < incident.length) id = window.setTimeout(step, STEP_MS);
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const v = Math.min(1, (now - t0) / (DURATION * 1000));
+      setP(v);
+      if (v < 1) raf = requestAnimationFrame(tick);
     };
-    id = window.setTimeout(step, 300);
-    return () => window.clearTimeout(id);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [inView, reduce, run]);
 
-  const k = shown === 0 ? "idle" : incident[shown - 1].k;
-  const rolling = k === "rollout" || k === "detect";
-  const paused = k === "pause" || k === "cause";
-  const back = shown >= 5;
-  const traffic = shown === 0 ? 0 : back ? 0 : 10;
-  const errors = shown >= 2 && !back ? 14.6 : 0;
-  const state = shown === 0 ? "ready" : rolling ? "rolling out" : paused ? "paused itself" : shown >= 7 ? "fixed · back in review" : "rolled back to v15";
+  const p = reduce ? 1 : sweep;
+  const cx = PAD.l + p * (W - PAD.l - PAD.r);
+  const passed = EVENTS.filter((e) => x(e.m) <= cx + 0.5);
+  const now = passed[passed.length - 1];
+  const rolling = !!now && now.m === 0;
+  const done = p >= 1;
 
   return (
     <Section
       id="incidents"
       eyebrow="When AI goes wrong"
       title="Built for the two hours after something goes wrong."
-      sub="Changes still go wrong. What matters is how fast you see it, how few callers it reaches, and how cleanly you get back."
+      sub="What matters is how fast you see it, how few callers it reaches, and how cleanly you get back."
     >
-      <div ref={ref} className="grid gap-4 lg:grid-cols-12">
-        {/* live state */}
-        <Card className="flex flex-col p-6 md:p-7 lg:col-span-5">
-          <div className="flex items-center gap-4">
-            <span className="grid h-14 w-14 place-items-center rounded-[12px] border border-line bg-bone">
-              <Mark spinning={rolling} maxSpeed={11} centered className="h-8 w-8 text-ink" trail={false} title="Rollout state" />
-            </span>
-            <div>
-              <div className="t-label text-ink-3">Agent · v16</div>
-              <AnimatePresence mode="wait">
+      <div ref={ref}>
+        <Stage tone="carbon">
+          <div className="px-5 py-8 sm:px-10 md:py-11">
+            {/* state */}
+            <div className="flex flex-wrap items-center justify-between gap-5">
+              <div className="flex items-center gap-4">
+                <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-carbon-2 ring-1 ring-carbon-line">
+                  <Mark centered spinning={rolling} maxSpeed={11} className="h-6 w-6 text-bone" trail={false} title="Rollout state" />
+                </span>
+                <div>
+                  <div className="t-label text-on-carbon-3">Agent · v16 · Tuesday</div>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={now?.state ?? "ready"}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.25, ease: ease.out }}
+                      className={`text-[clamp(19px,1.8vw,24px)] tracking-[-0.02em] ${now?.fault ? "text-fault-lit" : "text-bone"}`}
+                    >
+                      {now?.state ?? "ready to roll out"}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+              <div className="flex items-center gap-5 text-[12.15px] text-on-carbon-2">
+                <span className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-[3px] bg-lime/35 ring-1 ring-lime/60" />
+                  Calls on v16
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="h-[2px] w-4 rounded-full bg-fault-lit" />
+                  Policy errors
+                </span>
+                {done && !reduce && (
+                  <button onClick={() => setRun((r) => r + 1)} className="t-label rounded-[7px] bg-carbon-2 px-2.5 py-1 text-on-carbon-2 ring-1 ring-carbon-line transition-colors hover:text-bone">
+                    ↺ Replay
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* the afternoon */}
+            <div className="mt-8 overflow-x-auto">
+              <svg viewBox={`0 0 ${W} ${H + 64}`} className="h-auto w-full min-w-[640px]" role="img" aria-label="Policy errors on v16 rise past the 5% limit at 14:07; the rollout pauses, rolls back at 14:12 and errors return to zero.">
+                <defs>
+                  <clipPath id="sweep">
+                    <rect x="0" y="0" width={cx} height={H + 64} />
+                  </clipPath>
+                </defs>
+                {/* grid */}
+                {[0, 5, 10, 15, 20].map((v) => (
+                  <g key={v}>
+                    <line x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} stroke="rgba(255,255,255,.06)" />
+                    <text x={PAD.l - 10} y={y(v) + 3.5} textAnchor="end" className="fill-[#6f7176] font-mono text-[10.5px]">
+                      {v}%
+                    </text>
+                  </g>
+                ))}
+                {/* time break */}
+                <g className="fill-[#6f7176] font-mono text-[10.5px]">
+                  <line x1={x(25) + 18} x2={x(25) + 18} y1={PAD.t} y2={H - PAD.b} stroke="rgba(255,255,255,.12)" strokeDasharray="2 4" />
+                  <text x={x(25) + 18} y={H - PAD.b + 16} textAnchor="middle">
+                    ···
+                  </text>
+                </g>
+                {/* limit */}
+                <line x1={PAD.l} x2={W - PAD.r} y1={y(LIMIT)} y2={y(LIMIT)} stroke="#e0714f" strokeOpacity=".55" strokeDasharray="5 5" />
+                <text x={W - PAD.r} y={y(LIMIT) - 7} textAnchor="end" className="fill-[#e0714f] font-mono text-[10.5px]">
+                  auto-pause above {LIMIT}%
+                </text>
+
+                <g clipPath="url(#sweep)">
+                  {/* calls on v16 */}
+                  <path d={`${path(TRAFFIC)} L${x(25)} ${y(0)} L${x(0)} ${y(0)} Z`} fill="rgba(215,243,106,.16)" />
+                  <path d={path(TRAFFIC)} fill="none" stroke="rgba(215,243,106,.65)" strokeWidth={1.5} />
+                  {/* errors */}
+                  <path d={path(ERR)} fill="none" stroke="#e0714f" strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
+                  {/* replay: back at zero */}
+                  <line x1={x(160)} x2={x(170)} y1={y(0)} y2={y(0)} stroke="#d7f36a" strokeWidth={2.2} strokeLinecap="round" />
+                </g>
+
+                {/* events */}
+                {EVENTS.map((e, n) => {
+                  const on = x(e.m) <= cx + 0.5;
+                  const ex = x(e.m);
+                  const row = n % 2;
+                  return (
+                    <motion.g key={e.t + e.label} initial={false} animate={{ opacity: on ? 1 : 0.18 }} transition={{ duration: 0.3 }}>
+                      <line x1={ex} x2={ex} y1={PAD.t} y2={H - PAD.b + 8 + row * 26} stroke={e.fault ? "#e0714f" : "rgba(255,255,255,.22)"} strokeDasharray="2 3" />
+                      <circle cx={ex} cy={H - PAD.b + 8 + row * 26} r={3.5} fill={e.fault ? "#e0714f" : on ? "#d7f36a" : "#3a3c42"} />
+                      {e.m > 100 ? (
+                        <text x={ex - 10} y={H - PAD.b + 12 + row * 26} textAnchor="end" className="fill-[#f1f0ec] text-[12px]">
+                          <tspan className="fill-[#a6a7ab] font-mono text-[10.5px]">{e.t}</tspan>
+                          <tspan dx="8">{e.label}</tspan>
+                        </text>
+                      ) : (
+                        <>
+                          <text x={ex + 9} y={H - PAD.b + 12 + row * 26} className="fill-[#a6a7ab] font-mono text-[10.5px]">
+                            {e.t}
+                          </text>
+                          <text x={ex + 48} y={H - PAD.b + 12 + row * 26} className={e.fault ? "fill-[#e0714f] text-[12px]" : "fill-[#f1f0ec] text-[12px]"}>
+                            {e.label}
+                          </text>
+                        </>
+                      )}
+                    </motion.g>
+                  );
+                })}
+
+                {/* cursor */}
+                {!done && <line x1={cx} x2={cx} y1={PAD.t - 8} y2={H - PAD.b} stroke="#f1f0ec" strokeOpacity=".7" strokeWidth={1.2} />}
+              </svg>
+            </div>
+
+            {/* what it adds up to */}
+            <div className="mt-8 grid gap-px overflow-hidden rounded-[16px] bg-carbon-line sm:grid-cols-3">
+              {[
+                { v: "7 min", k: "to catch it and pause" },
+                { v: "5 min", k: "to be back on v15" },
+                { v: "6 of 6", k: "affected customers corrected" },
+              ].map((s, n) => (
                 <motion.div
-                  key={state}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.3, ease: ease.out }}
-                  className={`text-[21.6px] tracking-[-0.02em] ${paused ? "text-[#a8411f]" : ""}`}
-                >
-                  {state}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="mt-8 grid gap-5">
-            <Meter label="Calls on v16" value={`${traffic}%`} fill={traffic / 100} />
-            <Meter
-              label="Policy errors on v16"
-              value={`${errors}%`}
-              fill={errors / 20}
-              limit={LIMIT / 20}
-              limitLabel={`pause above ${LIMIT}%`}
-              fault={errors > LIMIT}
-            />
-            <div className="flex items-center justify-between rounded-[10px] border border-line bg-bone px-4 py-3">
-              <span className="text-[13.05px]">v15 · previous version</span>
-              <span className="flex items-center gap-2 text-[12.6px] text-ink-2">
-                <span className={`h-2 w-2 rounded-full ${back ? "bg-lime-deep" : "bg-lime-deep/40"}`} />
-                {back ? "serving 100% of calls" : "kept warm"}
-              </span>
-            </div>
-          </div>
-
-          <p className="mt-auto pt-8 text-[12.6px] leading-[1.5] text-ink-2">
-            No one woke up to find out. The limit did its job.
-          </p>
-        </Card>
-
-        {/* the log it leaves behind */}
-        <Card className="p-6 md:p-7 lg:col-span-7">
-          <div className="flex items-center justify-between">
-            <div className="t-label text-ink-3">Incident log · Tuesday</div>
-            {shown >= incident.length && !reduce && (
-              <button
-                onClick={() => {
-                  setN(0);
-                  setRun((r) => r + 1);
-                }}
-                className="t-label rounded-[7.2px] bg-sink px-2.5 py-1 text-ink-2 transition-colors hover:text-ink"
-              >
-                ↺ Replay
-              </button>
-            )}
-          </div>
-          <ol className="relative mt-6">
-            <span className="absolute bottom-3 left-[62px] top-3 w-px bg-line" aria-hidden />
-            {incident.map((e, i) => {
-              const on = i < shown;
-              const tone =
-                e.k === "detect" || e.k === "pause"
-                  ? "bg-fault"
-                  : e.k === "rollback" || e.k === "correct" || e.k === "replay"
-                    ? "bg-lime-deep"
-                    : "bg-ink-3";
-              return (
-                <motion.li
-                  key={`${e.t}-${e.k}`}
+                  key={s.k}
                   initial={false}
-                  animate={{ opacity: on ? 1 : 0.22 }}
-                  transition={{ duration: 0.4 }}
-                  className="relative grid grid-cols-[48px_28px_1fr] items-start gap-0 py-2.5"
+                  animate={{ opacity: done || reduce ? 1 : 0.35 }}
+                  transition={{ duration: 0.5, delay: n * 0.12 }}
+                  className="bg-carbon-2 px-6 py-5"
                 >
-                  <span className="pt-[1px] font-mono text-[11.7px] tabular-nums text-ink-3">{e.t}</span>
-                  <span className="relative flex justify-center pt-[5px]">
-                    <motion.span
-                      initial={false}
-                      animate={{ scale: on ? 1 : 0.6 }}
-                      className={`relative h-2.5 w-2.5 rounded-full ring-4 ring-paper ${on ? tone : "bg-line-2"}`}
-                    />
-                  </span>
-                  <span className={`text-[14.4px] leading-[1.45] ${e.k === "pause" && on ? "font-[540] text-[#a8411f]" : ""}`}>
-                    {e.text}
-                  </span>
-                </motion.li>
-              );
-            })}
-          </ol>
-        </Card>
+                  <div className="text-[clamp(26px,2.6vw,34px)] font-[500] leading-none tracking-[-0.035em] text-bone">{s.v}</div>
+                  <div className="mt-2 text-[12.6px] text-on-carbon-2">{s.k}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </Stage>
       </div>
     </Section>
-  );
-}
-
-function Meter({
-  label,
-  value,
-  fill,
-  limit,
-  limitLabel,
-  fault,
-}: {
-  label: string;
-  value: string;
-  fill: number;
-  limit?: number;
-  limitLabel?: string;
-  fault?: boolean;
-}) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <span className="text-[13.05px] text-ink-2">{label}</span>
-        <span className={`font-mono text-[13.05px] tabular-nums ${fault ? "text-[#a8411f]" : ""}`}>{value}</span>
-      </div>
-      <div className="relative mt-2 h-2 rounded-full bg-sink">
-        <motion.div
-          className={`h-full rounded-full ${fault ? "bg-fault" : "bg-ink"}`}
-          initial={false}
-          animate={{ width: `${Math.min(1, fill) * 100}%` }}
-          transition={{ duration: 0.6, ease: ease.out }}
-        />
-        {limit !== undefined && (
-          <span className="absolute -top-1 bottom-[-4px] w-px bg-ink/50" style={{ left: `${limit * 100}%` }} aria-hidden />
-        )}
-      </div>
-      {limitLabel && <div className="t-label mt-1.5 text-ink-3">{limitLabel}</div>}
-    </div>
   );
 }

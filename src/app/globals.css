@@ -502,3 +502,19 @@ body {
   line-height: 1.8;
   color: var(--color-ink-2);
 }
+
+/* voice bars in the voice pill */
+@keyframes voice {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[voice"] {
+    animation: none !important;
+  }
+}
