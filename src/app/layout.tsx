@@ -37,7 +37,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-GB" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
+    // data-scroll-behavior: Next turns smooth scrolling off while it changes pages,
+    // so a new page opens at the top instead of gliding there from the old scroll position.
+    <html lang="en-GB" data-scroll-behavior="smooth" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <body>
         {/* one nav for every page, so it can animate as the page changes */}
         <Nav />
