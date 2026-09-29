@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import { Nav } from "@/components/site/Nav";
 
 const sans = Instrument_Sans({
   variable: "--font-instrument-sans",
@@ -37,7 +38,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-GB" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>
+        {/* one nav for every page, so it can animate as the page changes */}
+        <Nav />
+        {children}
+      </body>
     </html>
   );
 }

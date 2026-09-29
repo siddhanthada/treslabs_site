@@ -117,15 +117,27 @@ export function Nav() {
           <Logo intro tone={dark ? "bone" : "ink"} />
         </Link>
 
-        <ul
+        <motion.ul
+          layout
+          transition={{ layout: { duration: 0.5, ease: ease.out } }}
           className="hidden items-center gap-1 md:flex"
           onMouseLeave={() => setHover(null)}
         >
-          {links.map((l) => {
+          <AnimatePresence mode="popLayout" initial={false}>
+          {links.map((l, n) => {
             const on = current === l.href;
+            const Tag = l.href.includes("#") ? "a" : Link;
             return (
-              <li key={l.href} className="relative">
-                <a
+              <motion.li
+                key={l.href}
+                layout
+                initial={{ opacity: 0, y: -6, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: 6, filter: "blur(4px)", transition: { duration: 0.22 } }}
+                transition={{ duration: 0.45, ease: ease.out, delay: 0.04 * n, layout: { duration: 0.5, ease: ease.out } }}
+                className="relative"
+              >
+                <Tag
                   href={l.href}
                   onClick={pin}
                   onMouseEnter={() => setHover(l.href)}
@@ -154,7 +166,7 @@ export function Nav() {
                     />
                   )}
                   {l.label}
-                </a>
+                </Tag>
                 <AnimatePresence>
                   {on && (
                     <motion.span
@@ -172,10 +184,11 @@ export function Nav() {
                     />
                   )}
                 </AnimatePresence>
-              </li>
+              </motion.li>
             );
           })}
-        </ul>
+          </AnimatePresence>
+        </motion.ul>
 
         <div className="flex items-center gap-2">
           <Link

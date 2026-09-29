@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CTA } from "@/components/home/CTA";
 import { Eyebrow } from "@/components/brand/Frame";
@@ -13,7 +12,6 @@ export const metadata: Metadata = {
 export default function Blog() {
   return (
     <>
-      <Nav />
       <main className="pt-[var(--nav-h)]">
         <section className="wrap pb-24 pt-16 md:pb-32 md:pt-24">
           <div className="max-w-[760px]">

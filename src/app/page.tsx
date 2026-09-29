@@ -1,4 +1,3 @@
-import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Hero } from "@/components/home/Hero";
 import { Sampling } from "@/components/home/Sampling";
@@ -22,7 +21,6 @@ import { CTA } from "@/components/home/CTA";
 export default function Home() {
   return (
     <>
-      <Nav />
       <main>
         <Hero />
         <Sampling />

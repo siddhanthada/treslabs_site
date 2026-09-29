@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CTA } from "@/components/home/CTA";
 import { Cover } from "@/components/blog/Cover";
@@ -34,7 +33,6 @@ export default async function Article({ params }: Params) {
 
   return (
     <>
-      <Nav />
       <ReadingProgress />
       <main className="pt-[var(--nav-h)]">
         <article>
