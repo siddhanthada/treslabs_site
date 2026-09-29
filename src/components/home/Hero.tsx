@@ -599,7 +599,7 @@ function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
                   const start = T.systems[i];
                   const state = t < start ? "waiting" : t < start + 0.45 ? "working" : "done";
                   return (
-                    <li key={k} className={`flex items-center gap-3 rounded-[12px] px-2 py-2 transition-colors duration-300 ${state === "working" ? "bg-bone" : ""}`}>
+                    <li key={k} className={`flex h-[56px] items-center gap-3 rounded-[12px] px-2 transition-colors duration-300 ${state === "working" ? "bg-bone" : ""}`}>
                       <span
                         className={`grid h-8 w-8 shrink-0 place-items-center rounded-[9px] text-[12.6px] font-[540] transition-colors duration-300 ${
                           state === "waiting" ? "bg-sink text-ink-3" : "bg-ink text-bone"
@@ -607,23 +607,27 @@ function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
                       >
                         {k[0]}
                       </span>
-                      {/* the name sits centred; when the result lands it lifts to make room */}
-                      <span className="min-w-0 flex-1">
-                        <span className={`block truncate text-[13.5px] transition-colors duration-300 ${state === "waiting" ? "text-ink-3" : "text-ink"}`}>{k}</span>
-                        <AnimatePresence initial={false}>
-                          {state === "done" && (
-                            <motion.span
-                              key={`${loop}-${k}`}
-                              initial={{ height: 0, opacity: 0, y: 4 }}
-                              animate={{ height: "auto", opacity: 1, y: 0 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.45, ease: ease.out }}
-                              className="block overflow-hidden"
-                            >
-                              <span className="block truncate pt-0.5 text-[12.15px] text-ink-2">{v}</span>
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
+                      {/* fixed height: the name sits centred beside the tile; when the result lands the
+                          name glides up and the result fades in beneath — nothing else moves */}
+                      <span className="relative block h-[40px] min-w-0 flex-1">
+                        <motion.span
+                          initial={false}
+                          animate={{ y: state === "done" ? "-105%" : "-50%" }}
+                          transition={{ duration: 0.45, ease: ease.out }}
+                          className={`absolute inset-x-0 top-1/2 block truncate text-[13.5px] leading-[18px] transition-colors duration-300 ${
+                            state === "waiting" ? "text-ink-3" : "text-ink"
+                          }`}
+                        >
+                          {k}
+                        </motion.span>
+                        <motion.span
+                          initial={false}
+                          animate={{ opacity: state === "done" ? 1 : 0, y: state === "done" ? "5%" : "35%" }}
+                          transition={{ duration: 0.45, ease: ease.out, delay: state === "done" ? 0.08 : 0 }}
+                          className="absolute inset-x-0 top-1/2 block truncate text-[12.15px] leading-[18px] text-ink-2"
+                        >
+                          {v}
+                        </motion.span>
                       </span>
                       <span className="flex w-16 shrink-0 items-center justify-end gap-2">
                         {state === "done" && <span className="font-mono text-[10.8px] text-ink-3">{MS[i]}ms</span>}
