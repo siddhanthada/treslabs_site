@@ -18,7 +18,7 @@ export function CTA() {
             Send a recording
           </Button>
           <Button href="/#partners" variant="ghost-dark">
-            Become a design partner
+            Become a partner
           </Button>
         </Reveal>
       </div>

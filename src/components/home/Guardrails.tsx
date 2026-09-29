@@ -137,7 +137,7 @@ export function Guardrails() {
             {/* the moment a guardrail does its job */}
             <Card className="flex flex-col p-6 lg:col-span-5">
               <div className="t-label text-ink-3">A guardrail at work</div>
-              <div className="mt-6 flex flex-1 flex-col justify-center gap-3">
+              <div className="mt-6 flex flex-col gap-3">
                 <Step delay={0.15}>
                   <div className="rounded-[10px] bg-bone px-4 py-3 shadow-[0_8px_24px_-16px_rgba(17,18,24,.35)]">
                     <p className="speech-caller text-[18px] leading-[1.2]">{ind.moment.caller}</p>
@@ -163,7 +163,17 @@ export function Guardrails() {
                   </div>
                 </Step>
               </div>
-              <p className="mt-6 border-t border-line pt-4 text-[12.6px] leading-[1.5] text-ink-2">
+              <Step delay={1.9}>
+                <div className="mt-3 rounded-[10px] border border-dashed border-line-2 p-4">
+                  <div className="t-label text-ink-3">Passed to a person</div>
+                  <ul className="mt-2.5 grid gap-1.5 font-mono text-[11.7px] leading-[1.45] text-ink-2">
+                    <li>✓ Caller verified</li>
+                    <li>✓ Reason · {ind.moment.stop.toLowerCase()}</li>
+                    <li>✓ Full transcript and context attached</li>
+                  </ul>
+                </div>
+              </Step>
+              <p className="mt-auto border-t border-line pt-4 text-[12.6px] leading-[1.5] text-ink-2">
                 It does the work. And it knows where to stop.
               </p>
             </Card>

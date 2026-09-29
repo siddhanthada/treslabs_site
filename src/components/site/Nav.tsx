@@ -172,7 +172,7 @@ export function Nav() {
             onClick={pin}
             className="btn btn-lime hidden md:inline-flex"
           >
-            Become a design partner
+            Become a partner
           </Link>
           <button
             type="button"
@@ -242,7 +242,7 @@ export function Nav() {
                 }}
                 className="btn btn-ink w-full"
               >
-                Become a design partner
+                Become a partner
               </Link>
             </div>
           </motion.div>

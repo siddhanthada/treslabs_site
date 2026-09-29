@@ -273,26 +273,56 @@ function Wave({ sc, t, onSeek }: { sc: Scenario; t: number; onSeek: (s: number) 
     }
     return out;
   }, [sc]);
+  const pos = Math.min(1, t / sc.duration);
   return (
-    <button
-      type="button"
-      className="mt-6 flex h-14 w-full items-center gap-[1.8px]"
-      aria-label="Seek within the call"
-      onClick={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        onSeek(((e.clientX - r.left) / r.width) * sc.duration);
-      }}
-    >
-      {bars.map((b, i) => (
+    <div className="mt-6">
+      <button
+        type="button"
+        className="relative flex h-14 w-full items-center gap-[2.7px]"
+        aria-label="Seek within the call"
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          onSeek(((e.clientX - r.left) / r.width) * sc.duration);
+        }}
+      >
+        {bars.map((b, i) => (
+          <span
+            key={i}
+            className="flex-1 rounded-full transition-colors duration-200"
+            style={{
+              height: `${b.h * 100}%`,
+              backgroundColor: b.at <= t ? (b.who ? "#9bbd28" : "#c9d99a") : b.who ? "#d9d9d2" : "#e8e8e3",
+            }}
+          />
+        ))}
+        {/* playhead */}
         <span
-          key={i}
-          className={`flex-1 rounded-[1.8px] transition-colors duration-200 ${
-            b.who === "caller" ? "bg-lime-deep" : b.who === "agent" ? "bg-ink" : "bg-line-2"
-          }`}
-          style={{ height: `${b.h * 100}%`, opacity: b.at <= t ? 1 : 0.22 }}
+          className="pointer-events-none absolute inset-y-0 w-[1.5px] rounded-full bg-ink transition-[left] duration-100"
+          style={{ left: `calc(${pos * 100}% - 0.75px)` }}
+          aria-hidden
         />
-      ))}
-    </button>
+      </button>
+      {/* who spoke when: a slim lane instead of recolouring the waveform */}
+      <div className="relative mt-2 h-[3px] w-full rounded-full bg-sink" aria-hidden>
+        {sc.turns.map((u) => (
+          <span
+            key={`${u.who}-${u.t0}`}
+            className={`absolute inset-y-0 rounded-full ${u.who === "caller" ? "bg-ink/70" : "bg-lime-deep/60"}`}
+            style={{ left: `${(u.t0 / sc.duration) * 100}%`, width: `${((u.t1 - u.t0) / sc.duration) * 100}%` }}
+          />
+        ))}
+      </div>
+      <div className="t-label mt-2 flex gap-4 text-ink-3" aria-hidden>
+        <span className="flex items-center gap-1.5">
+          <span className="h-[3px] w-3 rounded-full bg-ink/70" />
+          {sc.caller}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-[3px] w-3 rounded-full bg-lime-deep/60" />
+          Agent
+        </span>
+      </div>
+    </div>
   );
 }
 

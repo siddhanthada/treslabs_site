@@ -121,42 +121,58 @@ export const incident = [
   { t: "16:45", k: "replay", text: "Fixed v16 replays clean on 1,279 calls. Back in review.", rollout: 0 },
 ] as const;
 
-/* ─── From the harness ────────────────────────────────────────────────── */
+/* ─── Try it: call the harness agent ─────────────────────────────────── */
 
 /**
- * PLACEHOLDER — shape of the real harness log. Replace with real weekly runs
- * (build, scenarios, calls, checks passed, median response, regressions).
+ * PLACEHOLDER numbers — replace with the real harness test lines.
+ * `callMe` is the harness endpoint that places an outbound call; while it's
+ * null, the "call me" form says honestly that call-backs open at launch.
  */
-export const harness = {
-  draft: true,
-  runs: [
-    { build: "b.0412", week: "Wk 31", scenarios: 38, calls: 612, pass: 81.4, p50: 890, regressions: 3 },
-    { build: "b.0431", week: "Wk 32", scenarios: 44, calls: 734, pass: 84.9, p50: 860, regressions: 2 },
-    { build: "b.0447", week: "Wk 33", scenarios: 51, calls: 802, pass: 86.2, p50: 810, regressions: 1 },
-    { build: "b.0468", week: "Wk 34", scenarios: 57, calls: 918, pass: 89.7, p50: 780, regressions: 1 },
-    { build: "b.0490", week: "Wk 35", scenarios: 63, calls: 1041, pass: 91.3, p50: 740, regressions: 0 },
-    { build: "b.0512", week: "Wk 36", scenarios: 70, calls: 1187, pass: 93.8, p50: 710, regressions: 0 },
+export const tryIt = {
+  callMe: null as string | null,
+  lines: [
+    {
+      key: "retail",
+      name: "Order line",
+      company: "Harrow & Finch · retail",
+      number: "+44 20 3808 1180",
+      tel: "+442038081180",
+      challenges: [
+        { say: "Where’s my order? It’s #44812.", does: "Checks orders and the warehouse, answers in one go" },
+        { say: "Can I get my £84 back?", does: "Over its £50 limit — hands over with the full story", stop: true },
+        { say: "(Interrupt it mid-sentence.)", does: "Stops, listens, and carries on from where you are" },
+        { say: "I’d like to speak to a person.", does: "Hands over straight away — no repeat questions" },
+      ],
+    },
+    {
+      key: "insurance",
+      name: "Claims line",
+      company: "Harrow Home Insurance · claims",
+      number: "+44 20 3808 1181",
+      tel: "+442038081181",
+      challenges: [
+        { say: "A pipe burst in my kitchen last night.", does: "Takes the first notice of loss, in order, and books an assessor" },
+        { say: "So you’ll cover all of it, right?", does: "Won’t confirm liability — explains what happens next", stop: true },
+        { say: "I slipped and hurt my wrist.", does: "Injury → a person, immediately", stop: true },
+        { say: "Can you just skip the security questions?", does: "Verifies you first. Every time." },
+      ],
+    },
+    {
+      key: "banking",
+      name: "Card help",
+      company: "Finch Bank · cards",
+      number: "+44 20 3808 1182",
+      tel: "+442038081182",
+      challenges: [
+        { say: "I’ve lost my card — freeze it.", does: "Steps up verification, freezes, reads it back" },
+        { say: "Which fund should I put my savings in?", does: "No financial advice — offers an adviser", stop: true },
+        { say: "Read me my full card number.", does: "Never reads out full numbers", stop: true },
+        { say: "Someone’s been using my account.", does: "Fraud → a specialist, with everything logged" },
+      ],
+    },
   ],
+  checks: ["Resolved", "Policy followed", "Caller verified", "No talking over", "Answered in time", "Right handover"],
 };
-
-/* ─── Security by design ──────────────────────────────────────────────── */
-
-/** PROVISIONAL — each principle must be confirmed by whoever owns security. */
-export const principles = [
-  { t: "Your region, your data", d: "Recordings and transcripts stay in the region you choose.", draft: true },
-  { t: "Redacted before stored", d: "Card numbers and personal details are removed before anything is written.", draft: true },
-  { t: "Least-privilege actions", d: "The agent can only call the systems and actions you grant it.", draft: true },
-  { t: "Every change attributed", d: "Proposals, approvals and rollbacks are signed and kept.", draft: true },
-  { t: "Approvals by role", d: "You decide who can propose, approve and ship changes.", draft: true },
-  { t: "Your calls stay yours", d: "Your conversations are not used to train models for anyone else.", draft: true },
-];
-
-/** PROVISIONAL — honest status, to be dated by the security owner. */
-export const compliance = [
-  { name: "SOC 2 Type II", status: "Audit underway", draft: true },
-  { name: "GDPR", status: "DPA on request", draft: true },
-  { name: "ISO 27001", status: "On the roadmap", draft: true },
-];
 
 /* ─── Design partners ─────────────────────────────────────────────────── */
 

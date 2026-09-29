@@ -238,7 +238,7 @@ export function Hero() {
             className="mt-7 flex flex-wrap justify-center gap-3"
           >
             <Button href="#partners" variant="lime" arrow>
-              Become a design partner
+              Become a partner
             </Button>
             <Button href={contact.sendCall} variant="line">
               Send us a call

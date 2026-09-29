@@ -8,7 +8,7 @@ import { Scenarios } from "@/components/home/Scenarios";
 import { FailureToFix } from "@/components/home/FailureToFix";
 import { Human } from "@/components/home/Human";
 import { Incident } from "@/components/home/Incident";
-import { Harness } from "@/components/home/Harness";
+import { Try } from "@/components/home/Try";
 import { Security } from "@/components/home/Security";
 import { Partners } from "@/components/home/Partners";
 import { Writing } from "@/components/home/Writing";
@@ -17,9 +17,9 @@ import { CTA } from "@/components/home/CTA";
 
 /*
   The story, in order: a live call → why today's agents stall → the loop →
-  how you define an agent (goals and guardrails) → hear it → one failure
-  becomes a fix → the person it helps → what happens when it goes wrong →
-  proof from the harness → security → build it with us → writing → questions.
+  how you define an agent (goals and guardrails) → hear it → call it
+  yourself → one failure becomes a fix → the person it helps → what happens
+  when it goes wrong → security → build it with us → writing → questions.
   One light body, dark close.
 */
 export default function Home() {
@@ -32,10 +32,10 @@ export default function Home() {
         <Loop />
         <Guardrails />
         <Scenarios />
+        <Try />
         <FailureToFix />
         <Human />
         <Incident />
-        <Harness />
         <Security />
         <Partners />
         <Writing />
