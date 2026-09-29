@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ease } from "@/lib/motion";
 
@@ -20,6 +21,16 @@ export function Nav() {
   const [dark, setDark] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [active, setActive] = useState<string | null>(null);
+  // On Writing pages the nav narrows to Home | Writing; Home brings the full nav back.
+  const pathname = usePathname();
+  const onBlog = pathname?.startsWith("/blog") ?? false;
+  const links = onBlog
+    ? [
+        { href: "/", label: "Home" },
+        { href: "/blog", label: "Writing" },
+      ]
+    : navLinks;
+  const current = onBlog ? "/blog" : active;
   const [hover, setHover] = useState<string | null>(null);
   // While a nav click is scrolling the page, the nav stays put.
   const pinned = useRef(false);
@@ -110,8 +121,8 @@ export function Nav() {
           className="hidden items-center gap-1 md:flex"
           onMouseLeave={() => setHover(null)}
         >
-          {navLinks.map((l) => {
-            const on = active === l.href;
+          {links.map((l) => {
+            const on = current === l.href;
             return (
               <li key={l.href} className="relative">
                 <a
@@ -207,7 +218,7 @@ export function Nav() {
             transition={{ duration: 0.25 }}
           >
             <ul className="wrap flex flex-col pt-6">
-              {navLinks.map((l, i) => (
+              {links.map((l, i) => (
                 <motion.li
                   key={l.href}
                   initial={{ opacity: 0, y: 10 }}
