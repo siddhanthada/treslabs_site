@@ -568,7 +568,7 @@ function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
             {/* transcript */}
             <div className="border-b border-line p-5 lg:col-span-5 lg:border-b-0 lg:border-r">
               <div className="text-[12.15px] text-ink-3">Transcript</div>
-              <ul className="mt-4 flex min-h-[210px] flex-col gap-3">
+              <ul className="mt-4 flex flex-col gap-3">
                 <AnimatePresence initial={false}>
                   {lines.map((l) => (
                     <motion.li
@@ -607,11 +607,23 @@ function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
                       >
                         {k[0]}
                       </span>
+                      {/* the name sits centred; when the result lands it lifts to make room */}
                       <span className="min-w-0 flex-1">
-                        <span className={`block truncate text-[13.5px] ${state === "waiting" ? "text-ink-3" : "text-ink"}`}>{k}</span>
-                        <span className={`block truncate text-[12.15px] transition-opacity duration-300 ${state === "done" ? "text-ink-2 opacity-100" : "opacity-0"}`}>
-                          {v}
-                        </span>
+                        <span className={`block truncate text-[13.5px] transition-colors duration-300 ${state === "waiting" ? "text-ink-3" : "text-ink"}`}>{k}</span>
+                        <AnimatePresence initial={false}>
+                          {state === "done" && (
+                            <motion.span
+                              key={`${loop}-${k}`}
+                              initial={{ height: 0, opacity: 0, y: 4 }}
+                              animate={{ height: "auto", opacity: 1, y: 0 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.45, ease: ease.out }}
+                              className="block overflow-hidden"
+                            >
+                              <span className="block truncate pt-0.5 text-[12.15px] text-ink-2">{v}</span>
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
                       </span>
                       <span className="flex w-16 shrink-0 items-center justify-end gap-2">
                         {state === "done" && <span className="font-mono text-[10.8px] text-ink-3">{MS[i]}ms</span>}
@@ -634,7 +646,7 @@ function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
             {/* evaluation */}
             <div className="flex flex-col p-5 lg:col-span-3">
               <div className="text-[12.15px] text-ink-3">Evaluation</div>
-              <ul className="mt-4 grid gap-2.5">
+              <ul className="mt-4 grid gap-2">
                 {CHECKS.map((c, i) => {
                   const on = t >= T.evaluate + i * 0.12;
                   return (
@@ -651,14 +663,16 @@ function Trace({ t, loop, scene }: { t: number; loop: number; scene: Scene }) {
                   );
                 })}
               </ul>
+              {/* outcome: one compact line, so the window is only as tall as the actions */}
               <div
-                className={`mt-5 rounded-[14px] p-4 transition-all duration-500 ${
-                  t >= T.outcome ? "translate-y-0 bg-ink text-bone opacity-100" : "translate-y-1 bg-sink opacity-0"
+                className={`mt-4 flex items-center gap-2.5 rounded-[11px] bg-ink px-3 py-2.5 text-bone transition-all duration-500 ${
+                  t >= T.outcome ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
                 }`}
               >
-                <div className="text-[11.7px] text-on-carbon-3">Outcome</div>
-                <div className="mt-1 text-[16.2px] font-[540] tracking-[-0.01em]">{scene.outcome[0]}</div>
-                <div className="mt-0.5 text-[12.15px] text-on-carbon-2">{scene.outcome[1]}</div>
+                <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] bg-lime text-ink">
+                  <Check className="h-3 w-3" />
+                </span>
+                <span className="truncate text-[13.5px] font-[540]">{scene.outcome[0]}</span>
               </div>
             </div>
           </div>
