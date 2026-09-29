@@ -210,12 +210,8 @@ export function Hero() {
       <section id="top" className="flex min-h-svh flex-col overflow-x-clip pt-[var(--nav-h)]">
         <div className="wrap w-full pt-[clamp(28px,5svh,64px)] text-center">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-            <span className="inline-flex items-center gap-2.5 text-[12.15px] font-[480] leading-[15px] text-ink-2">
-              {/* the dot sits on the text's visual middle (between cap and x-height); its pulse grows from its own centre */}
-              <span className="relative grid h-[7px] w-[7px] translate-y-[1px] place-items-center" aria-hidden>
-                <span className="absolute inset-0 animate-ping rounded-full bg-lime-deep/35" />
-                <span className="relative h-[7px] w-[7px] rounded-full bg-lime-deep" />
-              </span>
+            <span className="inline-flex items-center gap-2.5 text-[12.15px] font-[480] text-ink-2">
+              <span className="live-dot !h-1.5 !w-1.5" />
               <span className="inline-flex items-center">
                 Private beta
                 <Sep />
