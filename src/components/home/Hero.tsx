@@ -7,7 +7,6 @@ import { contact } from "@/content/scenario";
 import { Button } from "@/components/site/Button";
 import { Mark } from "@/components/brand/Mark";
 import { Phone } from "@/components/brand/Phone";
-import { Eyebrow } from "@/components/brand/Frame";
 import { Pixel, PEOPLE } from "@/components/brand/Pixel";
 import { ease } from "@/lib/motion";
 
@@ -210,7 +209,10 @@ export function Hero() {
       <section id="top" className="flex min-h-svh flex-col overflow-x-clip pt-[var(--nav-h)]">
         <div className="wrap w-full pt-[clamp(28px,5svh,64px)] text-center">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-            <Eyebrow>Voice agents for customer operations</Eyebrow>
+            <span className="inline-flex items-center gap-2.5 text-[12.15px] font-[480] text-ink-2">
+              <span className="live-dot !h-1.5 !w-1.5" />
+              Private beta · now onboarding design partners
+            </span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 14 }}
@@ -235,8 +237,8 @@ export function Hero() {
             transition={{ duration: 0.8, ease: ease.out, delay: 0.18 }}
             className="mt-7 flex flex-wrap justify-center gap-3"
           >
-            <Button href={contact.demo} variant="lime" arrow>
-              Book a demo
+            <Button href="#partners" variant="lime" arrow>
+              Become a design partner
             </Button>
             <Button href={contact.sendCall} variant="line">
               Send us a call

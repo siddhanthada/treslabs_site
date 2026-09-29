@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ease } from "@/lib/motion";
 
 export const navLinks = [
-  { href: "#how", label: "How it works" },
-  { href: "#improve", label: "Improvement" },
-  { href: "#actions", label: "Actions" },
-  { href: "#every-call", label: "Why Treslabs" },
+  { href: "/#how", label: "How it works" },
+  { href: "/#guardrails", label: "Guardrails" },
+  { href: "/#security", label: "Security" },
+  { href: "/blog", label: "Writing" },
 ];
 
 export function Nav() {
@@ -53,10 +54,11 @@ export function Nav() {
       // Which section is being read.
       const mid = window.innerHeight * 0.4;
       const current = navLinks.find((l) => {
-        const r = document.querySelector(l.href)?.getBoundingClientRect();
+        const id = l.href.split("#")[1];
+        const r = id ? document.getElementById(id)?.getBoundingClientRect() : undefined;
         return r && r.top <= mid && r.bottom > mid;
       });
-      setActive(current?.href ?? null);
+      setActive(current?.href ?? (window.location.pathname.startsWith("/blog") ? "/blog" : null));
       // Take the tone of whatever section sits under the nav.
       const y = 32;
       const under = [
@@ -95,14 +97,14 @@ export function Nav() {
         className="wrap flex h-full items-center justify-between"
         aria-label="Main"
       >
-        <a
-          href="#top"
+        <Link
+          href="/"
           onClick={pin}
           aria-label="Treslabs home"
           className="-m-2 p-2"
         >
           <Logo intro tone={dark ? "bone" : "ink"} />
-        </a>
+        </Link>
 
         <ul
           className="hidden items-center gap-1 md:flex"
@@ -165,13 +167,13 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2">
-          <a
-            href="#contact"
+          <Link
+            href="/#partners"
             onClick={pin}
             className="btn btn-lime hidden md:inline-flex"
           >
-            Book a demo
-          </a>
+            Become a design partner
+          </Link>
           <button
             type="button"
             className="relative -mr-2 flex h-11 w-11 items-center justify-center md:hidden"
@@ -232,16 +234,16 @@ export function Nav() {
               ))}
             </ul>
             <div className="wrap mt-8">
-              <a
-                href="#contact"
+              <Link
+                href="/#partners"
                 onClick={() => {
                   pin();
                   setOpen(false);
                 }}
                 className="btn btn-ink w-full"
               >
-                Book a demo
-              </a>
+                Become a design partner
+              </Link>
             </div>
           </motion.div>
         )}

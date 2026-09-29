@@ -17,8 +17,8 @@ export function CTA() {
           <Button href={contact.sendCall} variant="lime" arrow>
             Send a recording
           </Button>
-          <Button href={contact.demo} variant="ghost-dark">
-            Book a demo
+          <Button href="/#partners" variant="ghost-dark">
+            Become a design partner
           </Button>
         </Reveal>
       </div>

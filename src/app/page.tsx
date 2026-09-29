@@ -3,15 +3,25 @@ import { Footer } from "@/components/site/Footer";
 import { Hero } from "@/components/home/Hero";
 import { Sampling } from "@/components/home/Sampling";
 import { Loop } from "@/components/home/Loop";
+import { Guardrails } from "@/components/home/Guardrails";
+import { Scenarios } from "@/components/home/Scenarios";
 import { FailureToFix } from "@/components/home/FailureToFix";
 import { Human } from "@/components/home/Human";
-import { Actions } from "@/components/home/Actions";
-import { Capabilities } from "@/components/home/Capabilities";
-import { CTA } from "@/components/home/CTA";
-import { Scenarios } from "@/components/home/Scenarios";
+import { Incident } from "@/components/home/Incident";
+import { Harness } from "@/components/home/Harness";
 import { Security } from "@/components/home/Security";
+import { Partners } from "@/components/home/Partners";
+import { Writing } from "@/components/home/Writing";
+import { FAQ } from "@/components/home/FAQ";
+import { CTA } from "@/components/home/CTA";
 
-/* Dark hero → one light body → dark close. */
+/*
+  The story, in order: a live call → why today's agents stall → the loop →
+  how you define an agent (goals and guardrails) → hear it → one failure
+  becomes a fix → the person it helps → what happens when it goes wrong →
+  proof from the harness → security → build it with us → writing → questions.
+  One light body, dark close.
+*/
 export default function Home() {
   return (
     <>
@@ -20,12 +30,16 @@ export default function Home() {
         <Hero />
         <Sampling />
         <Loop />
+        <Guardrails />
         <Scenarios />
         <FailureToFix />
         <Human />
-        <Actions />
-        <Capabilities />
+        <Incident />
+        <Harness />
         <Security />
+        <Partners />
+        <Writing />
+        <FAQ />
       </main>
       {/* The last screen is exactly the call to action + footer; the nav sits over its dark top. */}
       <div className="flex min-h-svh flex-col bg-carbon">

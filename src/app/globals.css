@@ -90,12 +90,12 @@ body {
 }
 
 ::selection {
-  background: var(--color-signal);
-  color: #fff;
+  background: var(--color-lime);
+  color: var(--color-ink);
 }
 
 :focus-visible {
-  outline: 1.8px solid var(--color-signal);
+  outline: 1.8px solid var(--color-lime-deep);
   outline-offset: 2.7px;
   border-radius: 3.6px;
 }
@@ -285,14 +285,14 @@ body {
   width: 6.3px;
   height: 6.3px;
   border-radius: 89.1px;
-  background: var(--color-signal);
+  background: var(--color-lime-deep);
 }
 .live-dot::after {
   content: "";
   position: absolute;
   inset: -3.6px;
   border-radius: inherit;
-  border: 1px solid var(--color-signal);
+  border: 1px solid var(--color-lime-deep);
   animation: live-ring 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 @keyframes live-ring {
@@ -355,4 +355,150 @@ body {
   .word {
     transition: none;
   }
+}
+
+/* ─── article (blog post body) ────────────────────────────────────────── */
+
+.article {
+  font-size: 17.1px;
+  line-height: 1.7;
+  color: var(--color-ink);
+}
+.article > * + * {
+  margin-top: 1.25em;
+}
+.article p {
+  color: #2c2e35;
+  text-wrap: pretty;
+}
+.article h2 {
+  margin-top: 2.4em;
+  font-size: 27px;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 540;
+}
+.article h2 + * {
+  margin-top: 0.8em;
+}
+/* our own statements: sans, large, a lime rule — serif is kept for callers */
+.article blockquote {
+  margin-block: 2em;
+  border-left: 3px solid var(--color-lime);
+  padding: 0.2em 0 0.2em 1.2em;
+}
+.article blockquote p {
+  font-size: 27px;
+  line-height: 1.25;
+  letter-spacing: -0.022em;
+  font-weight: 480;
+  color: var(--color-ink);
+}
+.article blockquote cite {
+  display: block;
+  margin-top: 0.8em;
+  font-style: normal;
+  font-size: 13.05px;
+  color: var(--color-ink-3);
+}
+.article .callout {
+  border-radius: 14.4px;
+  background: var(--color-lime-tint);
+  padding: 1.1em 1.3em;
+}
+.article .callout-title {
+  font-size: 14.4px;
+  font-weight: 560;
+  color: var(--color-lime-deep);
+}
+.article .callout p {
+  margin-top: 0.3em;
+  font-size: 15.3px;
+  line-height: 1.55;
+}
+.article .stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 14.4px;
+  background: var(--color-line);
+  margin-block: 2em;
+}
+.article .stats > div {
+  background: var(--color-paper);
+  padding: 1em 1.1em;
+}
+.article .stat-v {
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.article .stat-k {
+  margin-top: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 11.25px;
+  color: var(--color-ink-3);
+}
+.article .list {
+  display: grid;
+  gap: 0.6em;
+}
+.article .list li {
+  position: relative;
+  padding-left: 1.4em;
+  color: #2c2e35;
+}
+.article .list li::before {
+  content: "";
+  position: absolute;
+  left: 0.15em;
+  top: 0.68em;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--color-lime);
+  box-shadow: 0 0 0 1px rgba(86, 114, 10, 0.4);
+}
+/* people in serif, the agent in sans, the system in mono */
+.article .transcript {
+  margin-block: 2em;
+  border: 1px solid var(--color-line);
+  border-radius: 14.4px;
+  background: var(--color-paper);
+  padding: 0.6em 1.2em;
+}
+.article .transcript .line {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 1em;
+  padding-block: 0.7em;
+  border-bottom: 1px solid var(--color-line);
+}
+.article .transcript .line:last-child {
+  border-bottom: 0;
+}
+.article .transcript .who {
+  padding-top: 0.35em;
+  font-family: var(--font-mono);
+  font-size: 10.8px;
+  color: var(--color-ink-3);
+}
+.article .transcript .line-caller .what {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1.25;
+}
+.article .transcript .line-agent .what {
+  font-size: 16.2px;
+  line-height: 1.5;
+}
+.article .transcript .line-system .what {
+  font-family: var(--font-mono);
+  font-size: 12.6px;
+  line-height: 1.8;
+  color: var(--color-ink-2);
 }
