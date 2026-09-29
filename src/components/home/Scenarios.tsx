@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { Card, Section } from "@/components/site/Section";
-import { PEOPLE } from "@/components/brand/Pixel";
-import { Cover } from "@/components/blog/Cover";
+import { Pixel, PEOPLE } from "@/components/brand/Pixel";
 import { Mark } from "@/components/brand/Mark";
 import { SpokenWords, plain, turnProgress } from "@/components/speech/Spoken";
 import { scenarios, type Scenario } from "@/content/scenarios";
@@ -87,14 +86,14 @@ export function Scenarios() {
                   active ? "border-ink bg-paper" : "border-line bg-paper/60 hover:border-line-2 hover:bg-paper"
                 }`}
               >
-                <Cover
+                <Pixel
                   src={PEOPLE[s.person].src}
-                  alt=""
                   focus={PEOPLE[s.person].focus}
-                  zoom={1.4}
                   cols={30}
-                  delay={i * 120}
-                  sizes="72px"
+                  zoom={1.4}
+                  build={1.4}
+                  scan={false}
+                  gap={0.4}
                   className="h-[68.4px] w-[68.4px] shrink-0 overflow-hidden rounded-[9px]"
                 />
                 <span className="min-w-0">

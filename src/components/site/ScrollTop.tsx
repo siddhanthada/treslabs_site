@@ -54,7 +54,7 @@ export function ScrollTop() {
           exit={{ opacity: 0, y: 12, scale: 0.94 }}
           transition={{ duration: 0.35, ease: ease.out }}
           whileTap={{ scale: 0.94 }}
-          className={`group fixed bottom-5 right-5 z-40 grid place-items-center rounded-[12px] backdrop-blur-md backdrop-saturate-150 transition-[background-color,color,box-shadow] duration-300 focus-visible:outline-offset-4 md:bottom-7 md:right-7 ${
+          className={`group fixed cursor-pointer bottom-5 right-5 z-40 grid place-items-center rounded-[12px] backdrop-blur-md backdrop-saturate-150 transition-[background-color,color,box-shadow] duration-300 focus-visible:outline-offset-4 md:bottom-7 md:right-7 ${
             dark
               ? "bg-white/[0.06] text-on-carbon/80 ring-1 ring-white/10 hover:bg-lime hover:text-ink hover:shadow-[0_14px_34px_-16px_rgba(0,0,0,.7)] focus-visible:bg-lime focus-visible:text-ink"
               : "bg-paper/40 text-ink/70 ring-1 ring-ink/[0.08] hover:bg-ink hover:text-lime hover:shadow-[0_14px_34px_-16px_rgba(17,18,24,.45)] focus-visible:bg-ink focus-visible:text-lime"
