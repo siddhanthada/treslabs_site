@@ -15,8 +15,10 @@ import { ease } from "@/lib/motion";
   Hero: calls keep coming. A conveyor of callers — waiting on the left, live
   in the middle, finished on the right. The live call is a real photo and a
   real conversation; its voice drops into the call flow below, which plays
-  the same call on the same clock. When the call ends it resolves into pixels
-  (the call as Treslabs keeps it) and everything moves one step right.
+  the same call on the same clock. Only the live call is a photo: waiting
+  callers are pixels until they're picked up, and when the call ends it
+  resolves back into pixels (the call as Treslabs keeps it) and everything
+  moves one step right.
 
   Illustrative people (Unsplash), fictional calls for Harrow & Finch.
 */
@@ -334,7 +336,8 @@ function Bubble({ className, children }: { className: string; children: ReactNod
 }
 
 /**
- * One caller on the conveyor. Waiting: their photo. Live: the call itself.
+ * One caller on the conveyor. Waiting: pixels, which clear into the photo as
+ * the call is picked up. Live: the call itself.
  * Finished: the pixels Treslabs keeps, with the outcome. The pixel layer
  * mounts when the call ends and stays with the tile, so nothing re-renders.
  */
@@ -372,9 +375,15 @@ function Tile({
           fill
           priority={mode === "live"}
           sizes="(min-width: 1280px) 330px, (min-width: 768px) 32vw, 90vw"
-          className={`object-cover transition-opacity duration-500 ${mode === "done" ? "opacity-0" : ""}`}
+          className={`object-cover transition-opacity duration-500 ${mode === "live" ? "" : "opacity-0"}`}
           style={{ objectPosition: origin, transformOrigin: origin, transform: `scale(${zoom})` }}
         />
+        {/* waiting: pixels, fading out as the call is picked up */}
+        {mode !== "done" && (
+          <div className={`absolute inset-0 transition-opacity duration-500 ${mode === "queue" ? "opacity-100" : "opacity-0"}`} aria-hidden>
+            <Pixel src={who.src} focus={who.focus} zoom={zoom} cols={40} animate={false} scan={false} className="absolute inset-0" />
+          </div>
+        )}
         {pixels && (
           <Pixel src={who.src} focus={who.focus} zoom={zoom} cols={40} build={1} animate={!instant} scan={false} className="absolute inset-0" />
         )}
