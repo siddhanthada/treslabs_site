@@ -8,17 +8,15 @@ import { Button } from "@/components/site/Button";
 import { Mark } from "@/components/brand/Mark";
 import { Phone } from "@/components/brand/Phone";
 import { Sep } from "@/components/site/Sep";
-import { Pixel, PEOPLE } from "@/components/brand/Pixel";
+import { PEOPLE } from "@/components/brand/Pixel";
 import { ease } from "@/lib/motion";
 
 /*
   Hero: calls keep coming. A conveyor of callers — waiting on the left, live
   in the middle, finished on the right. The live call is a real photo and a
   real conversation; its voice drops into the call flow below, which plays
-  the same call on the same clock. Only the live call is a photo: waiting
-  callers are pixels until they're picked up, and when the call ends it
-  resolves back into pixels (the call as Treslabs keeps it) and everything
-  moves one step right.
+  the same call on the same clock. When the call ends everything moves one
+  step right.
 
   Illustrative people (Unsplash), fictional calls for Harrow & Finch.
 */
@@ -119,7 +117,7 @@ const T = {
   reply: 5.2,
   outcome: 6.2,
   evaluate: 6.8,
-  ends: 7.9, // the call resolves into pixels (1s)…
+  ends: 7.9, // the call ends…
   loop: 9.1, // …then straight on to the next caller
 };
 const MOVE = 0.7; // seconds for the conveyor to step
@@ -167,8 +165,6 @@ function useBreakpoint(): "sm" | "md" | "xl" {
   );
 }
 
-const pixelUrl = (src: string) => `${src}?w=640&q=75&auto=format`;
-
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.1 });
@@ -188,15 +184,6 @@ export function Hero() {
     return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, reduce]);
-
-  // warm the cache so every caller's pixels are ready when their call ends
-  useEffect(() => {
-    SCENES.forEach(({ who }) => {
-      const img = new window.Image();
-      img.crossOrigin = "anonymous";
-      img.src = pixelUrl(who.src);
-    });
-  }, []);
 
   const bp = useBreakpoint();
   const n = SCENES.length;
@@ -277,7 +264,6 @@ export function Hero() {
                     <Tile
                       scene={sceneOf(k)}
                       mode={mode}
-                      startsDone={k < 0}
                       ended={mode === "live" && ended}
                       t={t}
                       loop={loop}
@@ -336,15 +322,12 @@ function Bubble({ className, children }: { className: string; children: ReactNod
 }
 
 /**
- * One caller on the conveyor. Waiting: pixels, which clear into the photo as
- * the call is picked up. Live: the call itself.
- * Finished: the pixels Treslabs keeps, with the outcome. The pixel layer
- * mounts when the call ends and stays with the tile, so nothing re-renders.
+ * One caller on the conveyor. Waiting, live (the call itself), or finished
+ * with the outcome.
  */
 function Tile({
   scene,
   mode,
-  startsDone,
   ended,
   t,
   loop,
@@ -354,7 +337,6 @@ function Tile({
 }: {
   scene: Scene;
   mode: "queue" | "live" | "done";
-  startsDone: boolean;
   ended: boolean;
   t: number;
   loop: number;
@@ -363,8 +345,6 @@ function Tile({
   agent: string | null;
 }) {
   const { who, zoom } = scene;
-  const [instant] = useState(startsDone);
-  const pixels = mode === "done" || ended;
   const origin = `${who.focus.x * 100}% ${who.focus.y * 100}%`;
   return (
     <>
@@ -375,18 +355,9 @@ function Tile({
           fill
           priority={mode === "live"}
           sizes="(min-width: 1280px) 330px, (min-width: 768px) 32vw, 90vw"
-          className={`object-cover transition-opacity duration-500 ${mode === "live" ? "" : "opacity-0"}`}
+          className="object-cover"
           style={{ objectPosition: origin, transformOrigin: origin, transform: `scale(${zoom})` }}
         />
-        {/* waiting: pixels, fading out as the call is picked up */}
-        {mode !== "done" && (
-          <div className={`absolute inset-0 transition-opacity duration-500 ${mode === "queue" ? "opacity-100" : "opacity-0"}`} aria-hidden>
-            <Pixel src={who.src} focus={who.focus} zoom={zoom} cols={40} animate={false} scan={false} className="absolute inset-0" />
-          </div>
-        )}
-        {pixels && (
-          <Pixel src={who.src} focus={who.focus} zoom={zoom} cols={40} build={1} animate={!instant} scan={false} className="absolute inset-0" />
-        )}
       </div>
 
       {mode === "queue" && (
